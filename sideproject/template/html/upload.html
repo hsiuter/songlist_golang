@@ -51,6 +51,21 @@
             alert('主题和头像更新失败。');
         });
     }
+    function deleteSongList() {
+    fetch('/delete-songlist', {
+        method: 'POST'
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log(data);
+        alert('歌单删除成功！');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('删除歌单失败。');
+    });
+}
+
     </script>
 </head>
 <body>
@@ -58,6 +73,7 @@
         <input type="file" name="songlist" id="songlist" accept=".xlsx">
         <input type="submit" value="Upload">
     </form>
+    <button onclick="deleteSongList()">删除歌单</button>
     <form onsubmit="uploadThemeAndAvatar(event)">
         <!-- 主题配色选择 -->
         <input type="color" name="main_color" id="main_color">

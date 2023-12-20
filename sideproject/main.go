@@ -44,6 +44,7 @@ func main() {
 	r.POST("/login", handleLogin)
 	r.POST("/update-theme", handleThemeUpdate)
 	r.POST("/upload-songlist", handleSongListUpload)
+	r.POST("/delete-songlist", handleSongListDeletion)
 	r.POST("/display-songlist", handleSongListDisplay)
 	r.POST("/update-songlist", handleSongListUpdate)
 	r.POST("/update-theme-avatar", handleThemeAndAvatarUpload)
@@ -217,6 +218,23 @@ func handleSongListUpload(c *gin.Context) {
 	}
 
 	c.String(http.StatusOK, "上传成功")
+}
+func handleSongListDeletion(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get("user_id")
+
+	if userID == nil {
+		c.String(http.StatusUnauthorized, "请先登录")
+		return
+	}
+
+	_, err := db.Exec("DELETE FROM playlists WHERE user_id = ?", userID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "删除歌单失败")
+		return
+	}
+
+	c.String(http.StatusOK, "歌单删除成功")
 }
 func handleSongListDisplay(c *gin.Context) {
 	session := sessions.Default(c)
