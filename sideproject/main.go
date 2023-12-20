@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -45,6 +46,7 @@ func main() {
 	r.POST("/upload-songlist", handleSongListUpload)
 	r.POST("/display-songlist", handleSongListDisplay)
 	r.POST("/update-songlist", handleSongListUpdate)
+	r.POST("/update-theme-avatar", handleThemeAndAvatarUpload)
 
 	fmt.Println("Server is listening on port 8080...")
 	err = r.Run(":8080")
@@ -75,6 +77,7 @@ func createTables() {
 			user_id INTEGER,
 			main_color TEXT,
 			sub_color TEXT,
+			avatar_path,
 			FOREIGN KEY(user_id) REFERENCES users(id)
 		);
 	`)
@@ -133,7 +136,12 @@ func IndexPage(c *gin.Context) {
 }
 
 func UploadPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "upload.html", nil)
+	session := sessions.Default(c)
+	username := session.Get("username")
+
+	c.HTML(http.StatusOK, "upload.html", gin.H{
+		"Username": username,
+	})
 }
 
 func LoginPage(c *gin.Context) {
@@ -257,4 +265,67 @@ func handleSongListUpdate(c *gin.Context) {
 	}
 
 	c.String(http.StatusOK, "歌单更新成功")
+}
+
+func handleThemeAndAvatarUpload(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get("user_id")
+	username := session.Get("username")
+
+	// 检查用户是否已登录
+	if userID == nil || username == nil {
+		c.String(http.StatusUnauthorized, "请先登录")
+		return
+	}
+
+	// 获取颜色值
+	mainColor := c.PostForm("main_color")
+	subColor := c.PostForm("sub_color")
+
+	// 获取头像文件
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		c.String(http.StatusBadRequest, "获取头像文件出错")
+		return
+	}
+
+	// 构建存储路径
+	avatarDir := fmt.Sprintf("./uploads/avatars/%s/", username)
+	avatarPath := avatarDir + file.Filename
+
+	// 确保目录存在
+	if _, err := os.Stat(avatarDir); os.IsNotExist(err) {
+		err = os.MkdirAll(avatarDir, 0755)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "创建目录失败")
+			return
+		}
+	}
+
+	// 保存文件到服务器的指定位置
+	if err := c.SaveUploadedFile(file, avatarPath); err != nil {
+		c.String(http.StatusInternalServerError, "保存头像文件失败")
+		return
+	}
+
+	// 先检查数据库中是否已有该用户的主题数据
+	var count int
+	err = db.QueryRow("SELECT COUNT(*) FROM theme WHERE user_id = ?", userID).Scan(&count)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "查询数据库失败")
+		return
+	}
+
+	// 如果不存在，则插入新数据；如果存在，则更新数据
+	if count == 0 {
+		_, err = db.Exec("INSERT INTO theme (user_id, main_color, sub_color, avatar_path) VALUES (?, ?, ?, ?)", userID, mainColor, subColor, avatarPath)
+	} else {
+		_, err = db.Exec("UPDATE theme SET main_color = ?, sub_color = ?, avatar_path = ? WHERE user_id = ?", mainColor, subColor, avatarPath, userID)
+	}
+	if err != nil {
+		c.String(http.StatusInternalServerError, "更新数据库失败")
+		return
+	}
+
+	c.String(http.StatusOK, "主题和头像更新成功")
 }

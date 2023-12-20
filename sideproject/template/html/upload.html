@@ -25,6 +25,32 @@
 
             event.preventDefault();
         }
+        function uploadThemeAndAvatar(event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+
+        var mainColor = document.getElementById('main_color').value;
+        var subColor = document.getElementById('sub_color').value;
+        var avatarInput = document.getElementById('avatar');
+        var avatar = avatarInput.files[0];
+        var formData = new FormData();
+        formData.append('main_color', mainColor);
+        formData.append('sub_color', subColor);
+        formData.append('avatar', avatar);
+
+        fetch('/update-theme-avatar', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+            alert('主题和头像更新成功！');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('主题和头像更新失败。');
+        });
+    }
     </script>
 </head>
 <body>
@@ -32,5 +58,17 @@
         <input type="file" name="songlist" id="songlist" accept=".xlsx">
         <input type="submit" value="Upload">
     </form>
+    <form onsubmit="uploadThemeAndAvatar(event)">
+        <!-- 主题配色选择 -->
+        <input type="color" name="main_color" id="main_color">
+        <input type="color" name="sub_color" id="sub_color">
+        <!-- 头像上传 -->
+        <input type="file" name="avatar" id="avatar" accept="image/*">
+        <input type="submit" value="更新主题和头像">
+    </form>
+    <a href="/{{.Username}}/songlistpage">查看歌单</a>
+    <div class="user-info">
+        <span>欢迎, {{.Username}}</span>
+    </div>
 </body>
 </html>
