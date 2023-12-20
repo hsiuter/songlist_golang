@@ -22,6 +22,7 @@
         <thead>
             <tr>
                 <th>歌單名稱</th>
+                <th>歌手</th>
                 <th>語言</th>
                 <th>描述</th>
             </tr>
@@ -38,15 +39,18 @@
         })
         .then(response => response.json())
         .then(data => {
+            console.log(data)
             const table = document.getElementById('songlistTable').getElementsByTagName('tbody')[0];
             data.forEach(songlist => {
                 let row = table.insertRow();
                 let cell1 = row.insertCell(0);
                 let cell2 = row.insertCell(1);
                 let cell3 = row.insertCell(2);
+                let cell4 = row.insertCell(3);
                 cell1.innerHTML = songlist.Name;
-                cell2.innerHTML = songlist.Language;
-                cell3.innerHTML = songlist.Description;
+                cell2.innerHTML = songlist.Singer;
+                cell3.innerHTML = songlist.Language;
+                cell4.innerHTML = songlist.Description;
             });
         })
         .catch(error => console.error('Error:', error));

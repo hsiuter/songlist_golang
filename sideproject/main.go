@@ -65,6 +65,7 @@ func createTables() {
 			id INTEGER PRIMARY KEY,
 			user_id INTEGER,
 			name TEXT,
+			singer TEXT,
 			language TEXT,
 			description TEXT,
 			FOREIGN KEY(user_id) REFERENCES users(id)
@@ -200,7 +201,7 @@ func handleSongListUpload(c *gin.Context) {
 	}
 
 	for _, row := range rows {
-		_, err = db.Exec("INSERT INTO playlists (user_id, name, language, description) VALUES (?, ?, ?, ?)", userID, row[0], row[1], row[2])
+		_, err = db.Exec("INSERT INTO playlists (user_id, name, singer,language, description) VALUES (?, ?, ?, ?, ?)", userID, row[0], row[1], row[2], row[3])
 		if err != nil {
 			c.String(http.StatusInternalServerError, "存储数据失败")
 			return
@@ -213,7 +214,7 @@ func handleSongListDisplay(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
 
-	rows, err := db.Query("SELECT name, language, description FROM playlists WHERE user_id = ?", userID)
+	rows, err := db.Query("SELECT name, singer, language, description FROM playlists WHERE user_id = ?", userID)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "查询歌单失败")
 		return
@@ -222,6 +223,7 @@ func handleSongListDisplay(c *gin.Context) {
 
 	var playlists []struct {
 		Name        string
+		Singer      string
 		Language    string
 		Description string
 	}
@@ -229,10 +231,11 @@ func handleSongListDisplay(c *gin.Context) {
 	for rows.Next() {
 		var p struct {
 			Name        string
+			Singer      string
 			Language    string
 			Description string
 		}
-		if err := rows.Scan(&p.Name, &p.Language, &p.Description); err != nil {
+		if err := rows.Scan(&p.Name, &p.Singer, &p.Language, &p.Description); err != nil {
 			c.String(http.StatusInternalServerError, "读取歌单失败")
 			return
 		}
