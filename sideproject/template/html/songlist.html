@@ -18,6 +18,7 @@
 </head>
 <body>
     <h1>我的歌單</h1>
+    <input type="text" id="searchBox" placeholder="搜索歌名...">
     <table id="songlistTable">
         <thead>
             <tr>
@@ -33,27 +34,46 @@
     </table>
 
     <script>
-        // 在這裡添加JavaScript代碼
+        // 原有的代码...
+    
+        // 添加搜索事件监听器
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            searchSong(e.target.value);
+        });
+    
+        // 定义全局变量来存储歌单数据
+        let songlistData = [];
+    
+        // 定义搜索歌曲的函数
+        function searchSong(searchText) {
+            const filteredData = songlistData.filter(songlist => songlist.Name.includes(searchText));
+            displaySongs(filteredData);
+        }
+    
+        // 修改原来的数据获取方法，以存储数据到全局变量
         fetch('/display-songlist', {
             method: 'POST'
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
-            const table = document.getElementById('songlistTable').getElementsByTagName('tbody')[0];
-            data.forEach(songlist => {
-                let row = table.insertRow();
-                let cell1 = row.insertCell(0);
-                let cell2 = row.insertCell(1);
-                let cell3 = row.insertCell(2);
-                let cell4 = row.insertCell(3);
-                cell1.innerHTML = songlist.Name;
-                cell2.innerHTML = songlist.Singer;
-                cell3.innerHTML = songlist.Language;
-                cell4.innerHTML = songlist.Description;
-            });
+            songlistData = data; // 存储数据到全局变量
+            displaySongs(data); // 显示数据
         })
         .catch(error => console.error('Error:', error));
+    
+        // 定义一个新函数来显示歌单
+        function displaySongs(data) {
+            const tableBody = document.getElementById('songlistTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // 清空现有数据
+            data.forEach(songlist => {
+                let row = tableBody.insertRow();
+                row.insertCell(0).innerHTML = songlist.Name;
+                row.insertCell(1).innerHTML = songlist.Singer;
+                row.insertCell(2).innerHTML = songlist.Language;
+                row.insertCell(3).innerHTML = songlist.Description;
+            });
+        }
     </script>
+    
 </body>
 </html>
