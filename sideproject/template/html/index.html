@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>注册页面</title>
+</head>
+<body>
+    <h1>注册</h1>
+    <form id="registration-form" action="/register" method="post">
+        <label for="username">用户名:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">密码:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <label for="email">信箱:</label>
+        <input type="text" id="email" name="email" required><br><br>
+
+        <input type="submit" value="注册">
+    </form>
+
+    <script>
+        document.getElementById("registration-form").addEventListener("submit", function(event) {
+            event.preventDefault(); // 阻止默认表单提交行为
+
+            // 获取用户名和密码
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            var email = document.getElementById("email").value;
+
+            // 创建一个新的HTTP请求
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/register", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            // 将用户名和密码作为表单数据发送到服务器
+            xhr.send("username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&email=" + encodeURIComponent(email));
+
+            // 处理服务器的响应
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        alert("注册成功"); // 注册成功的提示
+                        window.location.reload(); // 可选：注册成功后刷新页面
+                    } else {
+                        alert("注册失败: " + xhr.responseText); // 显示注册失败的具体原因
+                    }
+                }
+            };
+        });
+    </script>
+</body>
+</html>

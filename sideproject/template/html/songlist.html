@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>歌單列表</title>
+    <style>
+        /* 在這裡添加CSS樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>我的歌單</h1>
+    <table id="songlistTable">
+        <thead>
+            <tr>
+                <th>歌單名稱</th>
+                <th>語言</th>
+                <th>描述</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 歌單數據將在這裡顯示 -->
+        </tbody>
+    </table>
+
+    <script>
+        // 在這裡添加JavaScript代碼
+        fetch('/display-songlist', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            const table = document.getElementById('songlistTable').getElementsByTagName('tbody')[0];
+            data.forEach(songlist => {
+                let row = table.insertRow();
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                cell1.innerHTML = songlist.Name;
+                cell2.innerHTML = songlist.Language;
+                cell3.innerHTML = songlist.Description;
+            });
+        })
+        .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
