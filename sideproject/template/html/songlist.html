@@ -14,10 +14,17 @@
             padding: 8px;
             text-align: left;
         }
+        .selected {
+            background-color: #4CAF50; /* 绿色背景 */
+            color: white;
+        }
     </style>
 </head>
 <body>
     <h1>我的歌單</h1>
+    <button id="chineseButton">中文</button>
+    <button id="japaneseButton">日文</button>
+    <button id="englishButton">英文</button>
     <input type="text" id="searchBox" placeholder="搜索歌名...">
     <table id="songlistTable">
         <thead>
@@ -34,7 +41,37 @@
     </table>
 
     <script>
-        // 原有的代码...
+        // 按钮元素
+        const chineseButton = document.getElementById('chineseButton');
+        const japaneseButton = document.getElementById('japaneseButton');
+        const englishButton = document.getElementById('englishButton');
+
+        // 按钮事件监听器
+        chineseButton.addEventListener('click', () => toggleLanguageFilter('中文'));
+        japaneseButton.addEventListener('click', () => toggleLanguageFilter('日文'));
+        englishButton.addEventListener('click', () => toggleLanguageFilter('英文'));
+
+        let selectedLanguage = '';
+
+        function toggleLanguageFilter(language) {
+            selectedLanguage = (selectedLanguage === language) ? '' : language;
+            updateButtons();
+            searchAndFilterSongs();
+        }
+
+        function updateButtons() {
+            // 根据筛选状态更新按钮样式
+            chineseButton.classList.toggle('button-selected', selectedLanguage === '中文');
+            japaneseButton.classList.toggle('button-selected', selectedLanguage === '日文');
+            englishButton.classList.toggle('button-selected', selectedLanguage === '英文');
+        }
+
+        function updateButtons() {
+            // 更新按钮样式
+            chineseButton.classList.toggle('selected', selectedLanguage === '中文');
+            japaneseButton.classList.toggle('selected', selectedLanguage === '日文');
+            englishButton.classList.toggle('selected', selectedLanguage === '英文');
+        }   
     
         // 添加搜索事件监听器
         document.getElementById('searchBox').addEventListener('input', function(e) {
@@ -45,10 +82,23 @@
         let songlistData = [];
     
         // 定义搜索歌曲的函数
-        function searchSong(searchText) {
-            const filteredData = songlistData.filter(songlist => songlist.Name.includes(searchText));
+        function searchAndFilterSongs() {
+            const searchText = document.getElementById('searchBox').value;
+            let filteredData = songlistData;
+
+            if (selectedLanguage) {
+                filteredData = filteredData.filter(songlist => songlist.Language === selectedLanguage);
+            }
+
+            if (searchText) {
+                filteredData = filteredData.filter(songlist => songlist.Name.includes(searchText));
+            }
+
             displaySongs(filteredData);
         }
+
+        // 修改现有的搜索事件监听器
+        document.getElementById('searchBox').addEventListener('input', searchAndFilterSongs);
     
         // 修改原来的数据获取方法，以存储数据到全局变量
         fetch('/display-songlist', {
