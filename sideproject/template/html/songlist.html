@@ -22,6 +22,9 @@
 </head>
 <body>
     <h1>我的歌單</h1>
+    <div id="avatar">
+        <img id="avatarImage" src="" alt="用户头像">
+    </div>
     <button id="chineseButton">中文</button>
     <button id="japaneseButton">日文</button>
     <button id="englishButton">英文</button>
@@ -41,6 +44,34 @@
     </table>
 
     <script>
+        const url = window.location.href;
+        const usernameRegex = /\/([^/]+)\/songlistpage/;
+        const match = url.match(usernameRegex);
+
+        if (match && match[1]) {
+            const username = match[1];
+            // 现在你有了用户名，可以将它发送到后端以获取userID和头像路径
+            fetch(`/get-userid-and-avatar?username=${username}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.userID && data.avatarPath) {
+                    const avatarPath = data.avatarPath;
+                    // 在这里使用头像路径，例如设置用户头像的<img>标签的src属性
+                    const avatarImage = document.getElementById('avatarImage');
+                    console.log(avatarPath);
+                    avatarImage.src = avatarPath;
+                } else {
+                    console.error("UserID or avatarPath not found in response");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        } else {
+            console.error("Username not found in URL");
+        }
+
+
         // 按钮元素
         const chineseButton = document.getElementById('chineseButton');
         const japaneseButton = document.getElementById('japaneseButton');

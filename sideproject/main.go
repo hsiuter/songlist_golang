@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -31,6 +33,8 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
 
+	r.Static("/uploads", "./uploads")
+	r.Static("/assets", "./template/assets")
 	r.LoadHTMLGlob("template/html/*")
 
 	r.GET("/register", IndexPage)
@@ -39,15 +43,22 @@ func main() {
 	// r.GET("/songlistpage", SonglistPage)
 	// 在main函数中，添加一个新的带参数的路由
 	r.GET("/:username/songlistpage", SonglistPage)
+	r.GET("/forgetpage", ForgetPage)
+
+	r.GET("/get-userid-and-avatar", handleGetUserIDAndAvatar)
 
 	r.POST("/register", handleRegistration)
 	r.POST("/login", handleLogin)
-	r.POST("/update-theme", handleThemeUpdate)
 	r.POST("/upload-songlist", handleSongListUpload)
 	r.POST("/delete-songlist", handleSongListDeletion)
 	r.POST("/display-songlist", handleSongListDisplay)
 	r.POST("/update-songlist", handleSongListUpdate)
-	r.POST("/update-theme-avatar", handleThemeAndAvatarUpload)
+	// r.POST("/update-theme-avatar", handleThemeAndAvatarUpload)
+
+	r.POST("/update-avatar", handleAvatarUpload)
+	r.POST("/update-theme", handleThemeUpload)
+
+	r.POST("/reset-password", handleResetPassword)
 
 	fmt.Println("Server is listening on port 8080...")
 	err = r.Run(":8080")
@@ -62,7 +73,9 @@ func createTables() {
 			id INTEGER PRIMARY KEY,
 			username TEXT,
 			password TEXT,
-			email TEXT
+			email TEXT,
+			security_question TEXT,
+    		security_answer TEXT
 		);
 		CREATE TABLE IF NOT EXISTS playlists (
 			id INTEGER PRIMARY KEY,
@@ -78,7 +91,12 @@ func createTables() {
 			user_id INTEGER,
 			main_color TEXT,
 			sub_color TEXT,
-			avatar_path,
+			FOREIGN KEY(user_id) REFERENCES users(id)
+		);
+		CREATE TABLE IF NOT EXISTS avatar (
+			id INTEGER PRIMARY KEY,
+			user_id INTEGER,
+			avatar_path TEXT,
 			FOREIGN KEY(user_id) REFERENCES users(id)
 		);
 	`)
@@ -90,20 +108,24 @@ func handleRegistration(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 	email := c.PostForm("email")
+	securityQuestion := c.PostForm("security_question")
+	securityAnswer := c.PostForm("security_answer")
+	fmt.Println(username, password, email, securityQuestion, securityAnswer)
 
 	if username == "" || password == "" {
 		c.String(http.StatusBadRequest, "用户名和密码不能为空")
 		return
 	}
 
-	_, err := db.Exec("INSERT INTO users (username, password, email) VALUES (?, ?, ?)", username, password, email)
+	_, err := db.Exec("INSERT INTO users (username, password, email, security_question, security_answer) VALUES (?, ?, ?, ?, ?)", username, password, email, securityQuestion, securityAnswer)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "注册失败")
 		log.Println("注册失败:", err)
 		return
 	}
 
-	c.String(http.StatusOK, "注册成功")
+	// c.String(http.StatusOK, "注册成功")
+	// c.Redirect(http.StatusFound, "/loginpage")
 }
 
 func handleLogin(c *gin.Context) {
@@ -126,10 +148,10 @@ func handleLogin(c *gin.Context) {
 	session.Set("username", username) // 存储用户名到会话中
 	session.Save()
 
-	c.Redirect(http.StatusFound, fmt.Sprintf("/%s/songlistpage", username))
+	// c.Redirect(http.StatusFound, fmt.Sprintf("/%s/songlistpage", username))
 
 	// c.String(http.StatusOK, "登录成功")
-	// c.Redirect(http.StatusFound, "/uploadpage")
+	c.Redirect(http.StatusFound, "/uploadpage")
 }
 
 func IndexPage(c *gin.Context) {
@@ -137,6 +159,9 @@ func IndexPage(c *gin.Context) {
 }
 
 func UploadPage(c *gin.Context) {
+	// wait 0.5 seconds
+	time.Sleep(500 * time.Millisecond)
+
 	session := sessions.Default(c)
 	username := session.Get("username")
 
@@ -159,6 +184,9 @@ func SonglistPage(c *gin.Context) {
 		"Username": username,
 		// 其他需要传递给模板的数据
 	})
+}
+func ForgetPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "forgetPassword.html", nil)
 }
 
 func handleThemeUpdate(c *gin.Context) {
@@ -285,20 +313,71 @@ func handleSongListUpdate(c *gin.Context) {
 	c.String(http.StatusOK, "歌单更新成功")
 }
 
-func handleThemeAndAvatarUpload(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
-	username := session.Get("username")
+func handleResetPassword(c *gin.Context) {
+	// 获取表单数据
+	username := c.PostForm("username")
+	securityQuestion := c.PostForm("security_question")
+	securityAnswer := c.PostForm("security_answer")
+	newPassword := c.PostForm("new_password")
 
-	// 检查用户是否已登录
-	if userID == nil || username == nil {
-		c.String(http.StatusUnauthorized, "请先登录")
+	// 根据用户名从数据库中获取用户的安全问题和答案
+	var storedSecurityQuestion, storedSecurityAnswer string
+	err := db.QueryRow("SELECT security_question, security_answer FROM users WHERE username = ?", username).Scan(&storedSecurityQuestion, &storedSecurityAnswer)
+	if err != nil {
+		c.String(http.StatusUnauthorized, "无效的用户名")
 		return
 	}
 
-	// 获取颜色值
-	mainColor := c.PostForm("main_color")
-	subColor := c.PostForm("sub_color")
+	// 验证安全问题和答案是否匹配
+	if securityQuestion != storedSecurityQuestion || securityAnswer != storedSecurityAnswer {
+		c.String(http.StatusUnauthorized, "安全问题或答案不正确")
+		return
+	}
+
+	// 更新用户的密码
+	_, err = db.Exec("UPDATE users SET password = ? WHERE username = ?", newPassword, username)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "密码重置失败")
+		return
+	}
+
+	c.String(http.StatusOK, "密码重置成功")
+}
+
+// 在 main.go 中编写 handleGetUserIDAndAvatar 函数
+func handleGetUserIDAndAvatar(c *gin.Context) {
+	username := c.DefaultQuery("username", "")
+
+	// 查询数据库以获取 userID
+	var userID int
+	err := db.QueryRow("SELECT id FROM users WHERE username = ?", username).Scan(&userID)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"userID":     0,  // 返回空的 userID
+			"avatarPath": "", // 返回空的头像路径
+		})
+		return
+	}
+
+	// 构建头像路径
+	avatarPath := fmt.Sprintf("/uploads/avatars/%d/avatar.jpg", userID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"userID":     userID,
+		"avatarPath": avatarPath,
+	})
+}
+
+// 处理上传头像的函数
+func handleAvatarUpload(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get("user_id")
+
+	// 检查用户是否已登录
+	if userID == nil {
+		c.String(http.StatusUnauthorized, "请先登录")
+		return
+	}
 
 	// 获取头像文件
 	file, err := c.FormFile("avatar")
@@ -307,9 +386,15 @@ func handleThemeAndAvatarUpload(c *gin.Context) {
 		return
 	}
 
+	// 检查文件类型（只允许 .jpg 文件）
+	if filepath.Ext(file.Filename) != ".jpg" {
+		c.String(http.StatusBadRequest, "只允许上传 .jpg 文件")
+		return
+	}
+
 	// 构建存储路径
-	avatarDir := fmt.Sprintf("./uploads/avatars/%s/", username)
-	avatarPath := avatarDir + file.Filename
+	avatarDir := fmt.Sprintf("./uploads/avatars/%d/", userID)
+	avatarPath := avatarDir + "avatar.jpg" // 始终设置文件名为 "avatar.jpg"
 
 	// 确保目录存在
 	if _, err := os.Stat(avatarDir); os.IsNotExist(err) {
@@ -320,30 +405,82 @@ func handleThemeAndAvatarUpload(c *gin.Context) {
 		}
 	}
 
-	// 保存文件到服务器的指定位置
+	// 检查是否已存在具有相同 user_id 的记录
+	var existingAvatarPath string
+	err = db.QueryRow("SELECT avatar_path FROM avatar WHERE user_id = ?", userID).Scan(&existingAvatarPath)
+	if err != nil && err != sql.ErrNoRows {
+		c.String(http.StatusInternalServerError, "查询数据库失败")
+		return
+	}
+
+	if existingAvatarPath != "" {
+		// 已存在具有相同 user_id 的记录，执行更新操作
+		// 更新数据库中的头像路径
+		_, err := db.Exec("UPDATE avatar SET avatar_path = ? WHERE user_id = ?", avatarPath, userID)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "更新数据库失败")
+			return
+		}
+	} else {
+		// 不存在具有相同 user_id 的记录，执行插入操作
+		_, err := db.Exec("INSERT INTO avatar (user_id, avatar_path) VALUES (?, ?)", userID, avatarPath)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "插入数据库失败")
+			return
+		}
+	}
+
+	// 保存文件到服务器的指定位置，始终使用文件名 "avatar.jpg"
 	if err := c.SaveUploadedFile(file, avatarPath); err != nil {
 		c.String(http.StatusInternalServerError, "保存头像文件失败")
 		return
 	}
 
-	// 先检查数据库中是否已有该用户的主题数据
-	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM theme WHERE user_id = ?", userID).Scan(&count)
-	if err != nil {
+	c.String(http.StatusOK, "头像更新成功")
+}
+
+// 处理上传主题的函数
+func handleThemeUpload(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get("user_id")
+
+	// 检查用户是否已登录
+	if userID == nil {
+		c.String(http.StatusUnauthorized, "请先登录")
+		return
+	}
+	fmt.Println(userID)
+
+	mainColor := c.PostForm("main_color")
+	subColor := c.PostForm("sub_color")
+
+	// 检查是否已存在具有相同 user_id 的记录
+	var existingUserID int
+	err := db.QueryRow("SELECT user_id FROM theme WHERE user_id = ?", userID).Scan(&existingUserID)
+	if err != nil && err != sql.ErrNoRows {
 		c.String(http.StatusInternalServerError, "查询数据库失败")
+		fmt.Println("查询数据库失败:", err)
 		return
 	}
 
-	// 如果不存在，则插入新数据；如果存在，则更新数据
-	if count == 0 {
-		_, err = db.Exec("INSERT INTO theme (user_id, main_color, sub_color, avatar_path) VALUES (?, ?, ?, ?)", userID, mainColor, subColor, avatarPath)
+	if existingUserID != 0 {
+		// 已存在具有相同 user_id 的记录，执行更新操作
+		_, err := db.Exec("UPDATE theme SET main_color = ?, sub_color = ? WHERE user_id = ?", mainColor, subColor, userID)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "更新数据库失败")
+			fmt.Println("更新数据库失败:", err)
+			return
+		}
 	} else {
-		_, err = db.Exec("UPDATE theme SET main_color = ?, sub_color = ?, avatar_path = ? WHERE user_id = ?", mainColor, subColor, avatarPath, userID)
-	}
-	if err != nil {
-		c.String(http.StatusInternalServerError, "更新数据库失败")
-		return
+		// 不存在具有相同 user_id 的记录，执行插入操作
+		_, err := db.Exec("INSERT INTO theme (user_id, main_color, sub_color) VALUES (?, ?, ?)", userID, mainColor, subColor)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "插入数据库失败")
+			fmt.Println("插入数据库失败:", err)
+			return
+		}
 	}
 
-	c.String(http.StatusOK, "主题和头像更新成功")
+	fmt.Println("主题更新成功")
+	c.String(http.StatusOK, "主题更新成功")
 }

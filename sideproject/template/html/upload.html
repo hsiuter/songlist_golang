@@ -11,7 +11,11 @@
 
             fetch('/upload-songlist', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                }
             })
             .then(response => response.text())
             .then(data => {
@@ -25,47 +29,85 @@
 
             event.preventDefault();
         }
-        function uploadThemeAndAvatar(event) {
-        event.preventDefault(); // 阻止表单的默认提交行为
 
-        var mainColor = document.getElementById('main_color').value;
-        var subColor = document.getElementById('sub_color').value;
-        var avatarInput = document.getElementById('avatar');
-        var avatar = avatarInput.files[0];
-        var formData = new FormData();
-        formData.append('main_color', mainColor);
-        formData.append('sub_color', subColor);
-        formData.append('avatar', avatar);
+        function uploadTheme() {
+            var mainColorInput = document.getElementById('main_color');
+            var subColorInput = document.getElementById('sub_color');
+            
+            var mainColor = mainColorInput.value;
+            var subColor = subColorInput.value;
+            
+            // 将颜色值转换为十六进制格式
+            mainColor = "#" + mainColor.slice(1); // 去掉颜色值前面的#
+            subColor = "#" + subColor.slice(1);
 
-        fetch('/update-theme-avatar', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.text())
-        .then(data => {
-            console.log(data);
-            alert('主题和头像更新成功！');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('主题和头像更新失败。');
-        });
-    }
-    function deleteSongList() {
-    fetch('/delete-songlist', {
-        method: 'POST'
-    })
-    .then(response => response.text())
-    .then(data => {
-        console.log(data);
-        alert('歌单删除成功！');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('删除歌单失败。');
-    });
-}
+            var formData = new FormData();
+            formData.append('main_color', mainColor);
+            formData.append('sub_color', subColor);
+            
+            fetch('update-theme?timestamp=' + Date.now(), {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                }
+            })
+            .then(data => {
+                console.log(data);
+                alert('主题更新成功！');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+        }
 
+        function uploadAvatar() {
+            var avatarInput = document.getElementById('avatar');
+            var avatar = avatarInput.files[0];
+            
+            var formData = new FormData();
+            formData.append('avatar', avatar);
+
+            fetch('/update-avatar', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('只允许上传 .jpg 文件');
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log(data);
+                alert('头像更新成功！');
+            })
+            .catch(error => {
+                cconsole.error('Error:', error);
+                alert(error.message);
+            });
+        }
+
+        function deleteSongList() {
+            fetch('/delete-songlist', {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data);
+                alert('歌单删除成功！');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('删除歌单失败。');
+            });
+        }
     </script>
 </head>
 <body>
@@ -74,13 +116,16 @@
         <input type="submit" value="Upload">
     </form>
     <button onclick="deleteSongList()">删除歌单</button>
-    <form onsubmit="uploadThemeAndAvatar(event)">
+    <form onsubmit="uploadTheme()">
         <!-- 主题配色选择 -->
         <input type="color" name="main_color" id="main_color">
         <input type="color" name="sub_color" id="sub_color">
+        <input type="submit" value="更新主题">
+    </form>
+    <form onsubmit="uploadAvatar()">
         <!-- 头像上传 -->
-        <input type="file" name="avatar" id="avatar" accept="image/*">
-        <input type="submit" value="更新主题和头像">
+        <input type="file" name="avatar" id="avatar" accept="image/jpeg">
+        <input type="submit" value="更新头像">
     </form>
     <a href="/{{.Username}}/songlistpage">查看歌单</a>
     <div class="user-info">

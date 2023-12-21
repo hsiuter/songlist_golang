@@ -13,7 +13,23 @@
         <input type="password" id="password" name="password" required><br><br>
 
         <label for="email">信箱:</label>
-        <input type="text" id="email" name="email" required><br><br>
+        <input type="email" id="email" name="email" required><br><br>
+        <div>
+            <label for="security_question">安全问题：</label>
+            <select name="security_question" id="security_question">
+                <option value="您第一次去国外旅行的目的地是哪里？">您第一次去国外旅行的目的地是哪里？</option>
+                <option value="您小时候最喜欢的玩具是什么？">您小时候最喜欢的玩具是什么？</option>
+                <option value="您最亲近的朋友在小学时的名字是什么？">您最亲近的朋友在小学时的名字是什么？</option>
+                <option value="您家族中，第一个拥有汽车的是谁？">您家族中，第一个拥有汽车的是谁？</option>
+                <option value="您最喜欢的电影导演是谁？">您最喜欢的电影导演是谁？</option>
+                <option value="您人生中的第一次飞行是去往哪里的？">您人生中的第一次飞行是去往哪里的？</option>
+                <!-- 其他问题选项 -->
+            </select>
+        </div>
+        <div>
+            <label for="security_answer">答案：</label>
+            <input type="text" name="security_answer" id="security_answer" required>
+        </div>
 
         <input type="submit" value="注册">
     </form>
@@ -26,6 +42,8 @@
             var username = document.getElementById("username").value;
             var password = document.getElementById("password").value;
             var email = document.getElementById("email").value;
+            var security_question = document.getElementById("security_question").value;
+            var security_answer = document.getElementById("security_answer").value;
 
             // 创建一个新的HTTP请求
             var xhr = new XMLHttpRequest();
@@ -33,14 +51,14 @@
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
             // 将用户名和密码作为表单数据发送到服务器
-            xhr.send("username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&email=" + encodeURIComponent(email));
+            xhr.send("username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&email=" + encodeURIComponent(email)+ "&security_question=" + encodeURIComponent(security_question)+ "&security_answer=" + encodeURIComponent(security_answer));
 
             // 处理服务器的响应
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         alert("注册成功"); // 注册成功的提示
-                        window.location.reload(); // 可选：注册成功后刷新页面
+                        window.location.href = "/loginpage"; // 可选：注册成功后刷新页面
                     } else {
                         alert("注册失败: " + xhr.responseText); // 显示注册失败的具体原因
                     }
