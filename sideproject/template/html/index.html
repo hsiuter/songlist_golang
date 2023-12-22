@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>注册页面</title>
+    <link rel="stylesheet" href="/assets/css/register.css">
 </head>
+
 <body>
-    <h1>注册</h1>
     <form id="registration-form" action="/register" method="post">
-        <label for="username">用户名:</label>
-        <input type="text" id="username" name="username" required><br><br>
+        <div class="form-title">
+            注册
+        </div>
+        <label for="username">用户名</label>
+        <input type="text" id="username" name="username" required>
 
-        <label for="password">密码:</label>
-        <input type="password" id="password" name="password" required><br><br>
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password" required>
 
-        <label for="email">信箱:</label>
-        <input type="email" id="email" name="email" required><br><br>
-        <div>
+        <label for="email">信箱</label>
+        <input type="email" id="email" name="email" required>
+        <div class="form-input">
             <label for="security_question">安全问题：</label>
             <select name="security_question" id="security_question">
                 <option value="您第一次去国外旅行的目的地是哪里？">您第一次去国外旅行的目的地是哪里？</option>
@@ -26,16 +31,16 @@
                 <!-- 其他问题选项 -->
             </select>
         </div>
-        <div>
-            <label for="security_answer">答案：</label>
-            <input type="text" name="security_answer" id="security_answer" required>
+        <label for="security_answer">答案</label>
+        <input type="text" name="security_answer" id="security_answer" required>
+        <div class="submit_container">
+            <input type="submit" value="注册" class="submit-button">
         </div>
 
-        <input type="submit" value="注册">
     </form>
 
     <script>
-        document.getElementById("registration-form").addEventListener("submit", function(event) {
+        document.getElementById("registration-form").addEventListener("submit", function (event) {
             event.preventDefault(); // 阻止默认表单提交行为
 
             // 获取用户名和密码
@@ -51,10 +56,10 @@
             xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
             // 将用户名和密码作为表单数据发送到服务器
-            xhr.send("username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&email=" + encodeURIComponent(email)+ "&security_question=" + encodeURIComponent(security_question)+ "&security_answer=" + encodeURIComponent(security_answer));
+            xhr.send("username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password) + "&email=" + encodeURIComponent(email) + "&security_question=" + encodeURIComponent(security_question) + "&security_answer=" + encodeURIComponent(security_answer));
 
             // 处理服务器的响应
-            xhr.onreadystatechange = function() {
+            xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         alert("注册成功"); // 注册成功的提示
@@ -67,4 +72,5 @@
         });
     </script>
 </body>
+
 </html>

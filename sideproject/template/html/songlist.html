@@ -1,47 +1,52 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <title>歌單列表</title>
-    <style>
-        /* 在這裡添加CSS樣式 */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        .selected {
-            background-color: #4CAF50; /* 绿色背景 */
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/songlist.css">
 </head>
+
 <body>
-    <h1>我的歌單</h1>
-    <div id="avatar">
-        <img id="avatarImage" src="" alt="用户头像">
+    <!-- <h1>我的歌單</h1> -->
+    <div class="container">
+        <div class="intro_container">
+            <div id="avatar">
+                <img id="avatarImage" src="" alt="用户头像">
+            </div>
+            <div class="intro">栗安 LiAN</div>
+            <div class="intro">和她的栗子小曲</div>
+            <div class="intro">點歌名複製</div>
+        </div>
+        <div class="songlist_container">
+            <div class="button_container">
+                <button id="chineseButton">中文</button>
+                <button id="japaneseButton">日文</button>
+                <button id="englishButton">英文</button>
+            </div>
+            <input type="text" id="searchBox" placeholder="搜索歌名...">
+            <div class="table_container scrollbar">
+                <table id="songlistTable">
+                    <thead>
+                        <tr>
+                            <th>歌單名稱</th>
+                            <th>歌手</th>
+                            <th>語言</th>
+                            <th>備註</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 歌單數據將在這裡顯示 -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
     </div>
-    <button id="chineseButton">中文</button>
-    <button id="japaneseButton">日文</button>
-    <button id="englishButton">英文</button>
-    <input type="text" id="searchBox" placeholder="搜索歌名...">
-    <table id="songlistTable">
-        <thead>
-            <tr>
-                <th>歌單名稱</th>
-                <th>歌手</th>
-                <th>語言</th>
-                <th>描述</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 歌單數據將在這裡顯示 -->
-        </tbody>
-    </table>
+
+
+
 
     <script>
         const url = window.location.href;
@@ -54,19 +59,19 @@
             fetch(`/get-userid-and-avatar?username=${username}`, {
                 method: 'GET'
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.userID && data.avatarPath) {
-                    const avatarPath = data.avatarPath;
-                    // 在这里使用头像路径，例如设置用户头像的<img>标签的src属性
-                    const avatarImage = document.getElementById('avatarImage');
-                    console.log(avatarPath);
-                    avatarImage.src = avatarPath;
-                } else {
-                    console.error("UserID or avatarPath not found in response");
-                }
-            })
-            .catch(error => console.error('Error:', error));
+                .then(response => response.json())
+                .then(data => {
+                    if (data.userID && data.avatarPath) {
+                        const avatarPath = data.avatarPath;
+                        // 在这里使用头像路径，例如设置用户头像的<img>标签的src属性
+                        const avatarImage = document.getElementById('avatarImage');
+                        console.log(avatarPath);
+                        avatarImage.src = avatarPath;
+                    } else {
+                        console.error("UserID or avatarPath not found in response");
+                    }
+                })
+                .catch(error => console.error('Error:', error));
         } else {
             console.error("Username not found in URL");
         }
@@ -102,16 +107,16 @@
             chineseButton.classList.toggle('selected', selectedLanguage === '中文');
             japaneseButton.classList.toggle('selected', selectedLanguage === '日文');
             englishButton.classList.toggle('selected', selectedLanguage === '英文');
-        }   
-    
+        }
+
         // 添加搜索事件监听器
-        document.getElementById('searchBox').addEventListener('input', function(e) {
+        document.getElementById('searchBox').addEventListener('input', function (e) {
             searchSong(e.target.value);
         });
-    
+
         // 定义全局变量来存储歌单数据
         let songlistData = [];
-    
+
         // 定义搜索歌曲的函数
         function searchAndFilterSongs() {
             const searchText = document.getElementById('searchBox').value;
@@ -130,18 +135,24 @@
 
         // 修改现有的搜索事件监听器
         document.getElementById('searchBox').addEventListener('input', searchAndFilterSongs);
-    
+        const username = match[1];
+        console.log(username);
         // 修改原来的数据获取方法，以存储数据到全局变量
         fetch('/display-songlist', {
-            method: 'POST'
+            method: 'POST',
+            // username傳到後端
+            body: JSON.stringify({ username: username }), // 将用户名作为JSON数据发送到后端
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
-        .then(response => response.json())
-        .then(data => {
-            songlistData = data; // 存储数据到全局变量
-            displaySongs(data); // 显示数据
-        })
-        .catch(error => console.error('Error:', error));
-    
+            .then(response => response.json())
+            .then(data => {
+                songlistData = data; // 存储数据到全局变量
+                displaySongs(data); // 显示数据
+            })
+            .catch(error => console.error('Error:', error));
+
         // 定义一个新函数来显示歌单
         function displaySongs(data) {
             const tableBody = document.getElementById('songlistTable').getElementsByTagName('tbody')[0];
@@ -155,6 +166,7 @@
             });
         }
     </script>
-    
+
 </body>
+
 </html>

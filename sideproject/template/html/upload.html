@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>歌單上傳</title>
+    <link rel="stylesheet" href="/assets/css/upload.css">
     <script>
         function uploadFile() {
             var fileInput = document.getElementById('songlist');
@@ -17,15 +19,15 @@
                     'Pragma': 'no-cache',
                 }
             })
-            .then(response => response.text())
-            .then(data => {
-                console.log(data);
-                alert('Upload successful!');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Upload failed.');
-            });
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    alert('上傳成功！');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('上傳失敗！');
+                });
 
             event.preventDefault();
         }
@@ -33,10 +35,10 @@
         function uploadTheme() {
             var mainColorInput = document.getElementById('main_color');
             var subColorInput = document.getElementById('sub_color');
-            
+
             var mainColor = mainColorInput.value;
             var subColor = subColorInput.value;
-            
+
             // 将颜色值转换为十六进制格式
             mainColor = "#" + mainColor.slice(1); // 去掉颜色值前面的#
             subColor = "#" + subColor.slice(1);
@@ -44,7 +46,7 @@
             var formData = new FormData();
             formData.append('main_color', mainColor);
             formData.append('sub_color', subColor);
-            
+
             fetch('update-theme?timestamp=' + Date.now(), {
                 method: 'POST',
                 body: formData,
@@ -53,20 +55,20 @@
                     'Pragma': 'no-cache',
                 }
             })
-            .then(data => {
-                console.log(data);
-                alert('主题更新成功！');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert(error.message);
-            });
+                .then(data => {
+                    console.log(data);
+                    alert('主题更新成功！');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(error.message);
+                });
         }
 
         function uploadAvatar() {
             var avatarInput = document.getElementById('avatar');
             var avatar = avatarInput.files[0];
-            
+
             var formData = new FormData();
             formData.append('avatar', avatar);
 
@@ -78,58 +80,66 @@
                     'Pragma': 'no-cache',
                 }
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('只允许上传 .jpg 文件');
-                }
-                return response.text();
-            })
-            .then(data => {
-                console.log(data);
-                alert('头像更新成功！');
-            })
-            .catch(error => {
-                cconsole.error('Error:', error);
-                alert(error.message);
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('只允许上传 .jpg 文件');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(data);
+                    alert('头像更新成功！');
+                })
+                .catch(error => {
+                    cconsole.error('Error:', error);
+                    alert(error.message);
+                });
         }
 
         function deleteSongList() {
             fetch('/delete-songlist', {
                 method: 'POST'
             })
-            .then(response => response.text())
-            .then(data => {
-                console.log(data);
-                alert('歌单删除成功！');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('删除歌单失败。');
-            });
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    alert('歌单删除成功！');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除歌单失败。');
+                });
         }
     </script>
 </head>
+
 <body>
-    <form onsubmit="uploadFile()">
-        <input type="file" name="songlist" id="songlist" accept=".xlsx">
-        <input type="submit" value="Upload">
-    </form>
-    <button onclick="deleteSongList()">删除歌单</button>
-    <form onsubmit="uploadTheme()">
-        <!-- 主题配色选择 -->
-        <input type="color" name="main_color" id="main_color">
-        <input type="color" name="sub_color" id="sub_color">
-        <input type="submit" value="更新主题">
-    </form>
-    <form onsubmit="uploadAvatar()">
-        <!-- 头像上传 -->
-        <input type="file" name="avatar" id="avatar" accept="image/jpeg">
-        <input type="submit" value="更新头像">
-    </form>
-    <a href="/{{.Username}}/songlistpage">查看歌单</a>
-    <div class="user-info">
-        <span>欢迎, {{.Username}}</span>
+    <div class="container">
+        <div class="alltitle">檔案上傳</div>
+        <form onsubmit="uploadFile()" class="upload-form">
+            <input type="file" name="songlist" id="songlist" accept=".xlsx">
+            <input type="submit" value="上傳" class="uploadbutton">
+        </form>
+        <div class="deletebutton-container">
+            <button onclick="deleteSongList()" class="deletebutton">删除歌单</button>
+        </div>
+
+        <form onsubmit="uploadTheme()" class="theme-form">
+            <!-- 主题配色选择 -->
+            <input type="color" name="main_color" id="main_color" class="color">
+            <input type="color" name="sub_color" id="sub_color" class="color">
+            <input type="submit" value="更新主题" class="theme-button">
+        </form>
+        <form onsubmit="uploadAvatar()" class="upload-form">
+            <!-- 头像上传 -->
+            <input type="file" name="avatar" id="avatar" accept="image/jpeg">
+            <input type="submit" value="更新头像" class="uploadbutton">
+        </form>
+        <a href="/{{.Username}}/songlistpage" class="gotosonglist">查看歌单</a>
+        <div class="user-info">
+            <span>欢迎 {{.Username}}</span>
+        </div>
     </div>
 </body>
+
 </html>

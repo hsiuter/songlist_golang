@@ -1,0 +1,121 @@
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+input {
+    font-size: 18px;
+}
+
+button {
+    font-size: 18px;
+}
+
+.user-info {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 20px;
+}
+
+.container {
+    width: 30%;
+    height: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: auto;
+    background-color: #FFF;
+    border-radius: 10px;
+    padding: 0 30px;
+}
+
+.upload-form {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 10px 0;
+}
+
+#songlist {
+    width: 80%;
+    font-size: 20px;
+}
+
+#avatar {
+    width: 80%;
+    font-size: 20px;
+}
+
+.uploadbutton {
+    width: 20%;
+}
+
+.gotosonglist {
+    font-size: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+.gotosonglist:hover {
+    background-color: #004494;
+}
+
+.deletebutton-container {
+    width: 100%;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+}
+
+.deletebutton {
+    width: 20%;
+    margin: 10px 0;
+}
+
+.theme-form {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.color {
+    width: 20%;
+    margin-right: 20%;
+}
+
+.theme-button {
+    width: 20%;
+}
+
+.alltitle {
+    font-size: 30px;
+    font-weight: bold;
+    margin: 20px 0;
+}

@@ -40,7 +40,6 @@ func main() {
 	r.GET("/register", IndexPage)
 	r.GET("/uploadpage", UploadPage)
 	r.GET("/loginpage", LoginPage)
-	// r.GET("/songlistpage", SonglistPage)
 	// 在main函数中，添加一个新的带参数的路由
 	r.GET("/:username/songlistpage", SonglistPage)
 	r.GET("/forgetpage", ForgetPage)
@@ -117,15 +116,28 @@ func handleRegistration(c *gin.Context) {
 		return
 	}
 
-	_, err := db.Exec("INSERT INTO users (username, password, email, security_question, security_answer) VALUES (?, ?, ?, ?, ?)", username, password, email, securityQuestion, securityAnswer)
+	// 查询数据库以检查用户名是否已存在
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ?", username).Scan(&count)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "注册失败")
 		log.Println("注册失败:", err)
 		return
 	}
 
-	// c.String(http.StatusOK, "注册成功")
-	// c.Redirect(http.StatusFound, "/loginpage")
+	if count > 0 {
+		c.String(http.StatusBadRequest, "用户名已存在")
+		return
+	}
+
+	_, err = db.Exec("INSERT INTO users (username, password, email, security_question, security_answer) VALUES (?, ?, ?, ?, ?)", username, password, email, securityQuestion, securityAnswer)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "注册失败")
+		log.Println("注册失败:", err)
+		return
+	}
+
+	c.String(http.StatusOK, "注册成功")
 }
 
 func handleLogin(c *gin.Context) {
@@ -189,21 +201,6 @@ func ForgetPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "forgetPassword.html", nil)
 }
 
-func handleThemeUpdate(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
-
-	mainColor := c.PostForm("main_color")
-	subColor := c.PostForm("sub_color")
-
-	_, err := db.Exec("UPDATE theme SET main_color = ?, sub_color = ? WHERE user_id = ?", mainColor, subColor, userID)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "更新主题失败")
-		return
-	}
-
-	c.String(http.StatusOK, "主题更新成功")
-}
 func handleSongListUpload(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
@@ -265,9 +262,27 @@ func handleSongListDeletion(c *gin.Context) {
 	c.String(http.StatusOK, "歌单删除成功")
 }
 func handleSongListDisplay(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
+	// session := sessions.Default(c)
+	// userID := session.Get("user_id")
+	// 获取前端传递的用户名
+	var request struct {
+		Username string `json:"username"`
+	}
 
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.String(http.StatusBadRequest, "无效的请求")
+		return
+	}
+
+	username := request.Username
+	fmt.Println(username)
+
+	var userID int
+	err := db.QueryRow("SELECT id FROM users WHERE username = ?", username).Scan(&userID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "查無用戶")
+		return
+	}
 	rows, err := db.Query("SELECT name, singer, language, description FROM playlists WHERE user_id = ?", userID)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "查询歌单失败")
