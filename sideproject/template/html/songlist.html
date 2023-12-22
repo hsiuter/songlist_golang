@@ -154,15 +154,31 @@
             .catch(error => console.error('Error:', error));
 
         // 定义一个新函数来显示歌单
+        // 定义一个新函数来显示歌单
         function displaySongs(data) {
             const tableBody = document.getElementById('songlistTable').getElementsByTagName('tbody')[0];
             tableBody.innerHTML = ''; // 清空现有数据
             data.forEach(songlist => {
                 let row = tableBody.insertRow();
-                row.insertCell(0).innerHTML = songlist.Name;
+                let songNameCell = row.insertCell(0);
+                songNameCell.innerHTML = songlist.Name;
+                songNameCell.classList.add('clickable-song-name'); // 添加class以便于添加事件监听器
                 row.insertCell(1).innerHTML = songlist.Singer;
                 row.insertCell(2).innerHTML = songlist.Language;
                 row.insertCell(3).innerHTML = songlist.Description;
+
+                // 為歌曲名添加點擊事件
+                songNameCell.addEventListener('click', () => copySongNameToClipboard(songlist.Name));
+            });
+        }
+
+        // 定义一个函数来处理歌曲名的点击事件
+        function copySongNameToClipboard(songName) {
+            const textToCopy = `我可以點歌嗎！我想要聽${songName}`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('已複製到剪貼簿: ' + textToCopy); // 可以選擇是否顯示提示
+            }).catch(err => {
+                console.error('無法複製歌曲名稱', err);
             });
         }
     </script>
