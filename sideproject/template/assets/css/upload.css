@@ -25,9 +25,10 @@ button {
 }
 
 .user-info {
+    font-family: sans-serif;
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 10px;
+    right: 10px;
     font-size: 20px;
 }
 

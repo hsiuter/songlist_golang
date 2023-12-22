@@ -5,7 +5,7 @@
     <title>歌單上傳</title>
     <link rel="stylesheet" href="/assets/css/upload.css">
     <script>
-        function uploadFile() {
+        function uploadFile(event) {
             var fileInput = document.getElementById('songlist');
             var file = fileInput.files[0];
             var formData = new FormData();
@@ -19,19 +19,30 @@
                     'Pragma': 'no-cache',
                 }
             })
-                .then(response => response.text())
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.text();
+                    } else if (response.status === 400) {
+                        throw new Error('请选择文件');
+                    } else {
+                        throw new Error('Server Error');
+                    }
+                })
                 .then(data => {
                     console.log(data);
-                    alert('上傳成功！');
+                    if (data === '上传成功') {
+                        alert('上傳成功！');
+                    } else {
+                        alert('上傳失败，服务器返回了错误的响应！');
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('上傳失敗！');
+                    alert('上傳失败！' + error.message);
                 });
 
             event.preventDefault();
         }
-
         function uploadTheme() {
             var mainColorInput = document.getElementById('main_color');
             var subColorInput = document.getElementById('sub_color');
@@ -91,7 +102,7 @@
                     alert('头像更新成功！');
                 })
                 .catch(error => {
-                    cconsole.error('Error:', error);
+                    console.error('Error:', error);
                     alert(error.message);
                 });
         }
@@ -116,7 +127,7 @@
 <body>
     <div class="container">
         <div class="alltitle">檔案上傳</div>
-        <form onsubmit="uploadFile()" class="upload-form">
+        <form onsubmit="uploadFile(event)" class="upload-form">
             <input type="file" name="songlist" id="songlist" accept=".xlsx">
             <input type="submit" value="上傳" class="uploadbutton">
         </form>
@@ -137,7 +148,7 @@
         </form>
         <a href="/{{.Username}}/songlistpage" class="gotosonglist">查看歌单</a>
         <div class="user-info">
-            <span>欢迎 {{.Username}}</span>
+            <span>欢迎回来 {{.Username}}</span>
         </div>
     </div>
 </body>
