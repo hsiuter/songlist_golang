@@ -2,8 +2,10 @@
 <html>
 
 <head>
-    <title>歌單上傳</title>
+    <title>歌單管理</title>
     <link rel="stylesheet" href="/assets/css/upload.css">
+    <!-- <link rel="stylesheet" href="/assets/css/songlist_management.css"> -->
+    <!-- 这里可以添加更多的CSS样式 -->
     <script>
         function uploadFile(event) {
             var fileInput = document.getElementById('songlist');
@@ -32,6 +34,7 @@
                     console.log(data);
                     if (data === '上传成功') {
                         alert('上傳成功！');
+                        window.location.reload();
                     } else {
                         alert('上傳失败，服务器返回了错误的响应！');
                     }
@@ -119,6 +122,7 @@
                 .then(data => {
                     console.log(data);
                     alert('歌单删除成功！');
+                    window.location.reload();
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -130,32 +134,162 @@
 
 <body>
     <div class="container">
-        <div class="alltitle">檔案上傳</div>
-        <form onsubmit="uploadFile(event)" class="upload-form">
-            <input type="file" name="songlist" id="songlist" accept=".xlsx">
-            <input type="submit" value="上傳" class="uploadbutton">
-        </form>
-        <div class="deletebutton-container">
-            <button onclick="deleteSongList()" class="deletebutton">删除歌单</button>
+        <div class="navbar">
+            <button onclick="showSection('songlist-management')">歌单管理</button>
+            <button onclick="showSection('theme-management')">主题色管理</button>
+            <button onclick="showSection('go-to-songlist')">头像上传</button>
+            <div class="user-info">
+                <span>欢迎回来！{{.Username}}！</span>
+            </div>
         </div>
-
-        <form onsubmit="uploadTheme()" class="theme-form">
-            <!-- 主题配色选择 -->
-            <input type="color" name="main_color" id="main_color" class="color" value="{{.MainColor}}">
-            <input type="color" name="sub_color" id="sub_color" class="color" value="{{.SubColor}}">
-            <input type="color" name="sub_color_1" id="sub_color_1" class="color" value="{{.SubColor_1}}">
-            <input type="submit" value="更新主题" class="theme-button">
-        </form>
-        <form onsubmit="uploadAvatar()" class="upload-form">
-            <!-- 头像上传 -->
-            <input type="file" name="avatar" id="avatar" accept="image/jpeg">
-            <input type="submit" value="更新头像" class="uploadbutton">
-        </form>
-        <a href="/{{.Username}}/songlistpage" class="gotosonglist">查看歌单</a>
-        <div class="user-info">
-            <span>欢迎回来 {{.Username}}</span>
+        <div id="songlist-management" class="section">
+            <h1>歌单上传(我只吃.xlsx哦~)</h1>
+            <button id="showImageBtn">上传范例</button>
+            <div id="imageModal" class="modal">
+                <span class="close">&times;</span>
+                <img class="modal-content" id="modalImage">
+                <div id="caption"></div>
+            </div>
+            <div id="overlay"></div>
+            <form onsubmit="uploadFile(event)" class="upload-form">
+                <input type="file" name="songlist" id="songlist" accept=".xlsx">
+                <input type="submit" value="上傳歌单" class="uploadbutton">
+            </form>
+            <div class="deletebutton-container">
+                <button onclick="deleteSongList()" class="deletebutton">删除歌单</button>
+            </div>
+            <a href="/{{.Username}}/songlistpage" class="gotosonglist">查看歌单</a>
+            <!-- 歌单上传和删除的表单放在这里 -->
+            <h1>歌单管理</h1>
+            <form id="addSongForm">
+                <input type="text" id="songName" placeholder="歌曲名称">
+                <input type="text" id="singer" placeholder="歌手">
+                <input type="text" id="language" placeholder="语言">
+                <input type="text" id="description" placeholder="描述">
+                <button type="submit">添加歌曲</button>
+            </form>
+            <ul id="songlist_display">
+                <!-- 歌单列表将通过 JavaScript 动态加载 -->
+            </ul>
+        </div>
+        <div id="theme-management" class="section" style="display:none;">
+            <!-- 主题色管理的表单放在这里 -->
+            <form onsubmit="uploadTheme()" class="theme-form">
+                <!-- 主题配色选择 -->
+                <input type="color" name="main_color" id="main_color" class="color" value="{{.MainColor}}">
+                <input type="color" name="sub_color" id="sub_color" class="color" value="{{.SubColor}}">
+                <input type="color" name="sub_color_1" id="sub_color_1" class="color" value="{{.SubColor_1}}">
+                <input type="submit" value="更新主题" class="theme-button">
+            </form>
+        </div>
+        <div id="go-to-songlist" class="section" style="display:none;">
+            <!-- 查看歌单的链接放在这里 -->
+            <form onsubmit="uploadAvatar()" class="upload-form">
+                <!-- 头像上传 -->
+                <input type="file" name="avatar" id="avatar" accept="image/jpeg">
+                <input type="submit" value="更新头像" class="uploadbutton">
+            </form>
         </div>
     </div>
+
+    <script>
+        function showSection(sectionId) {
+            // 隐藏所有section
+            var sections = document.getElementsByClassName('section');
+            for (var i = 0; i < sections.length; i++) {
+                sections[i].style.display = 'none';
+            }
+            // 显示选中的section
+            document.getElementById(sectionId).style.display = 'block';
+        }
+    </script>
+    <script>
+        document.getElementById('addSongForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const songName = document.getElementById('songName').value;
+            const singer = document.getElementById('singer').value;
+            const language = document.getElementById('language').value;
+            const description = document.getElementById('description').value;
+
+            fetch('/add-song', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `name=${encodeURIComponent(songName)}&singer=${encodeURIComponent(singer)}&language=${encodeURIComponent(language)}&description=${encodeURIComponent(description)}`
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("歌曲添加成功");
+                        // 可以在这里清空表单，或者刷新歌单列表
+                        document.getElementById('addSongForm').reset();
+                        loadSongs(); // 如果您有这个函数来重新加载歌单
+                    } else {
+                        alert("添加歌曲失败");
+                    }
+                });
+        });
+
+        function deleteSong(songID) {
+            fetch('/delete-song', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'song_id=' + songID
+            })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('song-' + songID).remove();
+                    } else {
+                        alert("删除失败");
+                    }
+                });
+        }
+
+        function loadSongs() {
+            // 发送请求到服务器获取歌单
+            fetch('/display-songlists_for_user')
+                .then(response => response.json())
+                .then(data => {
+                    const listElement = document.getElementById('songlist_display');
+                    console.log(data);
+                    listElement.innerHTML = ''; // 清空现有列表
+                    data.forEach(song => {
+                        console.log(song.Name);
+                        const li = document.createElement('li');
+                        li.id = 'song-' + song.ID;
+                        li.textContent = `${song.Name}`;
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = '删除';
+                        deleteButton.onclick = function () {
+                            deleteSong(song.ID);
+                        };
+                        li.appendChild(deleteButton);
+                        listElement.appendChild(li);
+                    });
+                });
+        }
+
+        // 当页面加载时，加载歌单
+        loadSongs();
+        document.getElementById('showImageBtn').onclick = function () {
+            document.getElementById('imageModal').style.display = "block";
+            document.getElementById('overlay').style.display = "block";
+            document.getElementById('modalImage').src = "/assets/img/example.png"; // 替换为图片的路径
+        }
+
+        // 点击遮罩层或关闭按钮隐藏图片和遮罩层
+        document.getElementsByClassName("close")[0].onclick = function () {
+            document.getElementById('imageModal').style.display = "none";
+            document.getElementById('overlay').style.display = "none";
+        }
+        document.getElementById('overlay').onclick = function () {
+            document.getElementById('imageModal').style.display = "none";
+            document.getElementById('overlay').style.display = "none";
+        }
+    </script>
 </body>
 
 </html>

@@ -43,7 +43,7 @@ func main() {
 	// 在main函数中，添加一个新的带参数的路由
 	r.GET("/:username/songlistpage", SonglistPage)
 	r.GET("/forgetpage", ForgetPage)
-	r.GET("/songlist-management", SonglistManagementPage)
+	// r.GET("/songlist-management", SonglistManagementPage)
 
 	r.GET("/get-userid-and-avatar", handleGetUserIDAndAvatar)
 
@@ -235,15 +235,6 @@ func ForgetPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "forgetPassword.html", nil)
 }
 
-// SonglistManagementPage 用于处理歌单管理页面的请求
-func SonglistManagementPage(c *gin.Context) {
-	// 您可以在这里添加一些逻辑来传递数据到页面，比如用户信息等
-	// ...
-
-	// 渲染 HTML 页面
-	c.HTML(http.StatusOK, "songlist_management.html", nil)
-}
-
 func handleSongListUpload(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
@@ -271,13 +262,26 @@ func handleSongListUpload(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "打开文件失败")
 		return
 	}
-	rows, err := f.GetRows("工作表1")
+
+	rows, err := f.GetRows("Sheet1")
 	if err != nil {
-		c.String(http.StatusInternalServerError, "读取 Excel 失败")
-		return
+		// 尝试获取 "工作表1" 的行，而不是重新声明 rows
+		rows, err = f.GetRows("工作表1")
+		if err != nil {
+			rows, err = f.GetRows("sheet1")
+			if err != nil {
+				c.String(http.StatusInternalServerError, "读取 Excel 失败")
+				return
+			}
+		}
 	}
 
 	for _, row := range rows {
+		for i := 0; i < 4; i++ {
+			if len(row) <= i || row[i] == "" {
+				row = append(row, "")
+			}
+		}
 		_, err = db.Exec("INSERT INTO playlists (user_id, name, singer,language, description) VALUES (?, ?, ?, ?, ?)", userID, row[0], row[1], row[2], row[3])
 		if err != nil {
 			c.String(http.StatusInternalServerError, "存储数据失败")

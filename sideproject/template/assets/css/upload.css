@@ -1,122 +1,248 @@
-html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-}
-
 body {
+    font-family: sans-serif;
     margin: 0;
     padding: 0;
-    height: 100%;
-    width: 100%;
     background-color: #f4f4f4;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-input {
-    font-size: 18px;
-}
-
-button {
-    font-size: 18px;
-}
-
-.user-info {
-    font-family: sans-serif;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
 }
 
 .container {
-    width: 30%;
-    height: 60%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    width: 80%;
     margin: auto;
-    background-color: #FFF;
-    border-radius: 10px;
-    padding: 0 30px;
+    overflow: hidden;
 }
 
-.upload-form {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.navbar {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 0;
     text-align: center;
-    margin: 10px 0;
 }
 
-#songlist {
-    width: 80%;
-    font-size: 20px;
-}
-
-#avatar {
-    width: 80%;
-    font-size: 20px;
-}
-
-.uploadbutton {
-    width: 20%;
-}
-
-.gotosonglist {
-    font-size: 20px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    padding: 10px 20px;
-    background-color: #0056b3;
-    color: white;
+.navbar button {
+    background-color: #444;
     border: none;
-    border-radius: 10px;
-    text-decoration: none;
+    color: white;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.gotosonglist:hover {
-    background-color: #004494;
+.navbar button:hover {
+    background-color: #555;
 }
 
-.deletebutton-container {
-    width: 100%;
-    display: flex;
-    justify-content: right;
-    align-items: center;
+.section {
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.input,
+.upload-form input,
+.theme-form input {
+    display: block;
+    width: 50%;
+    max-width: 420px;
+    padding: 10px;
+    margin: 10px auto;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.uploadbutton,
+.deletebutton,
+.theme-button {
+    font-size: 18px;
+    display: block;
+    width: 100px !important;
+    margin: 10px auto;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #5cb85c;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .deletebutton {
-    width: 20%;
-    margin: 10px 0;
+    background-color: #d9534f;
 }
 
-.theme-form {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    margin: 10px 0;
+.deletebutton:hover {
+    background-color: #c9302c;
+}
+
+.uploadbutton:hover,
+.theme-button:hover {
+    background-color: #4cae4c;
 }
 
 .color {
-    width: 20%;
-    margin: 0 3.33%;
+    width: 50px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
 }
 
-.theme-button {
-    width: 20%;
+.gotosonglist {
+    font-size: 18px;
+    text-align: center;
+    text-decoration: none;
+    width: 100px;
+    display: block;
+    background-color: #5cb85c;
+    color: white;
+    border-radius: 5px;
+    margin: auto;
+    padding: 10px 0;
 }
 
-.alltitle {
-    font-size: 30px;
+.gotosonglist:hover {
+    background-color: #4cae4c;
+}
+
+#addSongForm {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+#addSongForm input[type="text"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#addSongForm button[type="submit"] {
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+
+
+h1 {
+    color: #444;
+    text-align: center;
+}
+
+
+#addSongForm button[type="submit"]:hover {
+    background-color: #4cae4c;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+    margin: auto;
+    max-width: 440px;
+}
+
+ul li {
+    background: #fff;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+ul li button {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+ul li button:hover {
+    background-color: #c9302c;
+}
+
+.user-info {
+    /* 靠右 */
+    position: absolute;
+    right: 10%;
+    top: 10px;
+    padding: 10px;
+    font-size: 18px;
     font-weight: bold;
-    margin: 20px 0;
+}
+
+#showImageBtn {
+    font-size: 18px;
+    display: block;
+    width: 100px !important;
+    margin: 10px auto;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #5cb85c;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+}
+
+#overlay {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
 }

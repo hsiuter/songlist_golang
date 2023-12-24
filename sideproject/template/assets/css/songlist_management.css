@@ -11,7 +11,7 @@ h1 {
     text-align: center;
 }
 
-form {
+#addSongForm {
     background: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -20,7 +20,7 @@ form {
     margin: 20px auto;
 }
 
-input[type="text"] {
+#addSongForm input[type="text"] {
     width: calc(100% - 22px);
     padding: 10px;
     margin-bottom: 10px;
@@ -28,7 +28,7 @@ input[type="text"] {
     border-radius: 4px;
 }
 
-button[type="submit"] {
+#addSongForm button[type="submit"] {
     background-color: #5cb85c;
     color: white;
     border: none;
@@ -42,7 +42,7 @@ button[type="submit"] {
     border-radius: 4px;
 }
 
-button[type="submit"]:hover {
+#addSongForm button[type="submit"]:hover {
     background-color: #4cae4c;
 }
 
