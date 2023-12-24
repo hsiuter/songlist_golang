@@ -46,17 +46,21 @@
         function uploadTheme() {
             var mainColorInput = document.getElementById('main_color');
             var subColorInput = document.getElementById('sub_color');
+            var subColor_1Input = document.getElementById('sub_color_1');
 
             var mainColor = mainColorInput.value;
             var subColor = subColorInput.value;
+            var subColor_1 = subColor_1Input.value;
 
             // 将颜色值转换为十六进制格式
             mainColor = "#" + mainColor.slice(1); // 去掉颜色值前面的#
             subColor = "#" + subColor.slice(1);
+            subColor_1 = "#" + subColor_1.slice(1);
 
             var formData = new FormData();
             formData.append('main_color', mainColor);
             formData.append('sub_color', subColor);
+            formData.append('sub_color_1', subColor_1);
 
             fetch('update-theme?timestamp=' + Date.now(), {
                 method: 'POST',
@@ -137,8 +141,9 @@
 
         <form onsubmit="uploadTheme()" class="theme-form">
             <!-- 主题配色选择 -->
-            <input type="color" name="main_color" id="main_color" class="color">
-            <input type="color" name="sub_color" id="sub_color" class="color">
+            <input type="color" name="main_color" id="main_color" class="color" value="{{.MainColor}}">
+            <input type="color" name="sub_color" id="sub_color" class="color" value="{{.SubColor}}">
+            <input type="color" name="sub_color_1" id="sub_color_1" class="color" value="{{.SubColor_1}}">
             <input type="submit" value="更新主题" class="theme-button">
         </form>
         <form onsubmit="uploadAvatar()" class="upload-form">

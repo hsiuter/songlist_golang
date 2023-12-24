@@ -15,8 +15,8 @@
                 <img id="avatarImage" src="" alt="用户头像">
             </div>
             <div id="intro">
-                <div class="intro">栗安 LiAN</div>
-                <div class="intro">和她的栗子小曲</div>
+                <div class="intro">{{.Username}}</div>
+                <div class="intro">和她的{{.Username}}小曲</div>
                 <div class="intro">點歌名複製</div>
             </div>
         </div>
@@ -51,6 +51,7 @@
 
 
     <script>
+        updateTheme('{{.MainColor}}', '{{.SubColor}}', '{{.SubColor_1}}');
         const url = window.location.href;
         const usernameRegex = /\/([^/]+)\/songlistpage/;
         const match = url.match(usernameRegex);
@@ -182,6 +183,11 @@
             }).catch(err => {
                 console.error('無法複製歌曲名稱', err);
             });
+        }
+        function updateTheme(mainColor, subColor, subColor_1) {
+            document.documentElement.style.setProperty('--main-color', mainColor);
+            document.documentElement.style.setProperty('--sub-color', subColor);
+            document.documentElement.style.setProperty('--sub-color-1', subColor_1);
         }
     </script>
 

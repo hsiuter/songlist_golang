@@ -12,7 +12,7 @@
             注册
         </div>
         <label for="username">用户名</label>
-        <input type="text" id="username" name="username" required>
+        <input type="text" id="username" name="username" pattern="[A-Za-z0-9]+" title="用户名只能包含英文字母和数字" required>
 
         <label for="password">密码</label>
         <input type="password" id="password" name="password" required>
@@ -50,6 +50,13 @@
             var security_question = document.getElementById("security_question").value;
             var security_answer = document.getElementById("security_answer").value;
 
+
+            var validUsername = /^[A-Za-z0-9]+$/.test(username);
+            if (!validUsername) {
+                alert("用户名只能包含英文字母和数字。");
+                event.preventDefault(); // 阻止表单提交
+                return;
+            }
             // 创建一个新的HTTP请求
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/register", true);

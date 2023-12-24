@@ -43,6 +43,7 @@ func main() {
 	// 在main函数中，添加一个新的带参数的路由
 	r.GET("/:username/songlistpage", SonglistPage)
 	r.GET("/forgetpage", ForgetPage)
+	r.GET("/songlist-management", SonglistManagementPage)
 
 	r.GET("/get-userid-and-avatar", handleGetUserIDAndAvatar)
 
@@ -52,15 +53,18 @@ func main() {
 	r.POST("/delete-songlist", handleSongListDeletion)
 	r.POST("/display-songlist", handleSongListDisplay)
 	r.POST("/update-songlist", handleSongListUpdate)
-	// r.POST("/update-theme-avatar", handleThemeAndAvatarUpload)
 
 	r.POST("/update-avatar", handleAvatarUpload)
 	r.POST("/update-theme", handleThemeUpload)
 
 	r.POST("/reset-password", handleResetPassword)
 
-	fmt.Println("Server is listening on port 8080...")
-	err = r.Run(":8080")
+	r.GET("/display-songlists_for_user", handleDisplaySonglists_for_user)
+	r.POST("/delete-song", handleDeleteSong)
+	r.POST("/add-song", handleAddSong)
+
+	fmt.Println("Server is listening on port 80...")
+	err = r.Run(":80")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -90,6 +94,7 @@ func createTables() {
 			user_id INTEGER,
 			main_color TEXT,
 			sub_color TEXT,
+			sub_color_1 TEXT,
 			FOREIGN KEY(user_id) REFERENCES users(id)
 		);
 		CREATE TABLE IF NOT EXISTS avatar (
@@ -176,9 +181,21 @@ func UploadPage(c *gin.Context) {
 
 	session := sessions.Default(c)
 	username := session.Get("username")
+	var mainColor, subColor, subColor_1 string
+	userID := session.Get("user_id")
+	if userID != nil {
+		// 查询数据库获取用户的主题颜色
+		err := db.QueryRow("SELECT main_color, sub_color, sub_color_1 FROM theme WHERE user_id = ?", userID).Scan(&mainColor, &subColor, &subColor_1)
+		if err != nil {
+			log.Println("获取颜色失败:", err)
+		}
+	}
 
 	c.HTML(http.StatusOK, "upload.html", gin.H{
-		"Username": username,
+		"Username":   username,
+		"MainColor":  mainColor,
+		"SubColor":   subColor,
+		"SubColor_1": subColor_1,
 	})
 }
 
@@ -191,14 +208,40 @@ func SonglistPage(c *gin.Context) {
 
 	// 可以根据用户名来获取用户特定的数据
 	// ...
+	var userID int
+	err := db.QueryRow("SELECT id FROM users WHERE username = ?", username).Scan(&userID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "查無用戶")
+		return
+	}
+
+	var mainColor, subColor, subColor_1 string
+	// 假设您已经获取了userID
+	err1 := db.QueryRow("SELECT main_color, sub_color, sub_color_1 FROM theme WHERE user_id = ?", userID).Scan(&mainColor, &subColor, &subColor_1)
+	if err1 != nil {
+		c.String(http.StatusInternalServerError, "查无颜色记录")
+		return
+	}
 
 	c.HTML(http.StatusOK, "songlist.html", gin.H{
-		"Username": username,
-		// 其他需要传递给模板的数据
+		"Username":   username,
+		"MainColor":  mainColor,
+		"SubColor":   subColor,
+		"SubColor_1": subColor_1,
+		// 其他数据...
 	})
 }
 func ForgetPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "forgetPassword.html", nil)
+}
+
+// SonglistManagementPage 用于处理歌单管理页面的请求
+func SonglistManagementPage(c *gin.Context) {
+	// 您可以在这里添加一些逻辑来传递数据到页面，比如用户信息等
+	// ...
+
+	// 渲染 HTML 页面
+	c.HTML(http.StatusOK, "songlist_management.html", nil)
 }
 
 func handleSongListUpload(c *gin.Context) {
@@ -468,6 +511,7 @@ func handleThemeUpload(c *gin.Context) {
 
 	mainColor := c.PostForm("main_color")
 	subColor := c.PostForm("sub_color")
+	subColor_1 := c.PostForm("sub_color_1")
 
 	// 检查是否已存在具有相同 user_id 的记录
 	var existingUserID int
@@ -480,7 +524,7 @@ func handleThemeUpload(c *gin.Context) {
 
 	if existingUserID != 0 {
 		// 已存在具有相同 user_id 的记录，执行更新操作
-		_, err := db.Exec("UPDATE theme SET main_color = ?, sub_color = ? WHERE user_id = ?", mainColor, subColor, userID)
+		_, err := db.Exec("UPDATE theme SET main_color = ?, sub_color = ?, sub_color_1 = ? WHERE user_id = ?", mainColor, subColor, subColor_1, userID)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "更新数据库失败")
 			fmt.Println("更新数据库失败:", err)
@@ -488,7 +532,7 @@ func handleThemeUpload(c *gin.Context) {
 		}
 	} else {
 		// 不存在具有相同 user_id 的记录，执行插入操作
-		_, err := db.Exec("INSERT INTO theme (user_id, main_color, sub_color) VALUES (?, ?, ?)", userID, mainColor, subColor)
+		_, err := db.Exec("INSERT INTO theme (user_id, main_color, sub_color, sub_color_1) VALUES (?, ?, ?, ?)", userID, mainColor, subColor, subColor_1)
 		if err != nil {
 			c.String(http.StatusInternalServerError, "插入数据库失败")
 			fmt.Println("插入数据库失败:", err)
@@ -498,4 +542,103 @@ func handleThemeUpload(c *gin.Context) {
 
 	fmt.Println("主题更新成功")
 	c.String(http.StatusOK, "主题更新成功")
+}
+
+// handleDisplaySonglists 函数用于处理歌单的显示
+func handleDisplaySonglists_for_user(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get("user_id")
+
+	if userID == nil {
+		c.String(http.StatusUnauthorized, "请先登录")
+		return
+	}
+
+	rows, err := db.Query("SELECT id, name, singer, language, description FROM playlists WHERE user_id = ?", userID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "查询歌单失败")
+		return
+	}
+	defer rows.Close()
+
+	var songlists []struct {
+		ID          int
+		Name        string
+		Singer      string
+		Language    string
+		Description string
+	}
+
+	for rows.Next() {
+		var s struct {
+			ID          int
+			Name        string
+			Singer      string
+			Language    string
+			Description string
+		}
+		if err := rows.Scan(&s.ID, &s.Name, &s.Singer, &s.Language, &s.Description); err != nil {
+			c.String(http.StatusInternalServerError, "读取歌单失败")
+			return
+		}
+		songlists = append(songlists, s)
+	}
+
+	c.JSON(http.StatusOK, songlists)
+}
+
+// handleDeleteSong 函数用于删除指定的歌曲
+func handleDeleteSong(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get("user_id")
+
+	// 确保用户已登录
+	if userID == nil {
+		c.String(http.StatusUnauthorized, "请先登录")
+		return
+	}
+
+	// 从请求中获取歌曲 ID
+	songID := c.PostForm("song_id")
+	fmt.Println(songID)
+	if songID == "" {
+		c.String(http.StatusBadRequest, "缺少歌曲 ID")
+		return
+	}
+
+	// 执行数据库删除操作
+	_, err := db.Exec("DELETE FROM playlists WHERE id = ? AND user_id = ?", songID, userID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "删除歌曲失败")
+		return
+	}
+
+	c.String(http.StatusOK, "歌曲删除成功")
+}
+
+// handleAddSong 函数用于添加新歌曲
+func handleAddSong(c *gin.Context) {
+	session := sessions.Default(c)
+	userID := session.Get("user_id")
+
+	// 确保用户已登录
+	if userID == nil {
+		c.String(http.StatusUnauthorized, "请先登录")
+		return
+	}
+
+	// 从请求中获取歌曲信息
+	name := c.PostForm("name")
+	singer := c.PostForm("singer")
+	language := c.PostForm("language")
+	description := c.PostForm("description")
+
+	// 向数据库添加新歌曲
+	_, err := db.Exec("INSERT INTO playlists (user_id, name, singer, language, description) VALUES (?, ?, ?, ?, ?)", userID, name, singer, language, description)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "添加歌曲失败")
+		return
+	}
+
+	c.String(http.StatusOK, "歌曲添加成功")
 }

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>歌单管理</title>
+    <!-- 添加其他所需的 CSS 和 JS 文件 -->
+    <link rel="stylesheet" href="/assets/css/songlist_management.css">
+</head>
+
+<body>
+    <h1>歌单管理</h1>
+    <form id="addSongForm">
+        <input type="text" id="songName" placeholder="歌曲名称">
+        <input type="text" id="singer" placeholder="歌手">
+        <input type="text" id="language" placeholder="语言">
+        <input type="text" id="description" placeholder="描述">
+        <button type="submit">添加歌曲</button>
+    </form>
+    <ul id="songlist">
+        <!-- 歌单列表将通过 JavaScript 动态加载 -->
+    </ul>
+    <script>
+        document.getElementById('addSongForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const songName = document.getElementById('songName').value;
+            const singer = document.getElementById('singer').value;
+            const language = document.getElementById('language').value;
+            const description = document.getElementById('description').value;
+
+            fetch('/add-song', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `name=${encodeURIComponent(songName)}&singer=${encodeURIComponent(singer)}&language=${encodeURIComponent(language)}&description=${encodeURIComponent(description)}`
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert("歌曲添加成功");
+                        // 可以在这里清空表单，或者刷新歌单列表
+                        document.getElementById('addSongForm').reset();
+                        loadSongs(); // 如果您有这个函数来重新加载歌单
+                    } else {
+                        alert("添加歌曲失败");
+                    }
+                });
+        });
+
+        function deleteSong(songID) {
+            fetch('/delete-song', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'song_id=' + songID
+            })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById('song-' + songID).remove();
+                    } else {
+                        alert("删除失败");
+                    }
+                });
+        }
+
+        function loadSongs() {
+            // 发送请求到服务器获取歌单
+            fetch('/display-songlists_for_user')
+                .then(response => response.json())
+                .then(data => {
+                    const listElement = document.getElementById('songlist');
+                    listElement.innerHTML = ''; // 清空现有列表
+                    data.forEach(song => {
+                        const li = document.createElement('li');
+                        li.id = 'song-' + song.ID;
+                        li.textContent = `${song.Name}`;
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = '删除';
+                        deleteButton.onclick = function () {
+                            deleteSong(song.ID);
+                        };
+                        li.appendChild(deleteButton);
+                        listElement.appendChild(li);
+                    });
+                });
+        }
+
+        // 当页面加载时，加载歌单
+        loadSongs();
+    </script>
+</body>
+
+</html>
