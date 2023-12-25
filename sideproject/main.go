@@ -64,7 +64,7 @@ func main() {
 	r.POST("/add-song", handleAddSong)
 
 	fmt.Println("Server is listening on port 80...")
-	err = r.Run(":8080")
+	err = r.Run(":80")
 	if err != nil {
 		log.Fatal(err)
 	}
