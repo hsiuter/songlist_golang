@@ -27,6 +27,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-size: 18px;
 }
 
 .navbar button:hover {
@@ -88,6 +89,9 @@ body {
 }
 
 .gotosonglist {
+    position: fixed;
+    bottom: 20px;
+    right: 12%;
     font-size: 18px;
     text-align: center;
     text-decoration: none;
@@ -183,13 +187,16 @@ ul li button:hover {
     /* 靠右 */
     position: absolute;
     right: 10%;
-    top: 10px;
+    top: 56px;
     padding: 10px;
     font-size: 18px;
     font-weight: bold;
 }
 
 #showImageBtn {
+    position: absolute;
+    right: 12%;
+    top: 21%;
     font-size: 18px;
     display: block;
     width: 100px !important;
@@ -206,7 +213,7 @@ ul li button:hover {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 3;
     padding-top: 100px;
     left: 0;
     top: 0;
@@ -245,4 +252,21 @@ ul li button:hover {
     font-size: 40px;
     font-weight: bold;
     cursor: pointer;
+}
+
+.browser-warning {
+    background-color: #ffcc00;
+    /* 警告顏色 */
+    color: black;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: bold;
+}
+
+.color-label {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 5px;
+    text-align: center;
+    margin-top: 10px;
 }

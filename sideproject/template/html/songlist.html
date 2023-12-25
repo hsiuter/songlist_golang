@@ -178,11 +178,28 @@
         // 定义一个函数来处理歌曲名的点击事件
         function copySongNameToClipboard(songName) {
             const textToCopy = `我可以點歌嗎！我想要聽${songName}`;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('已複製到剪貼簿: ' + textToCopy); // 可以選擇是否顯示提示
-            }).catch(err => {
-                console.error('無法複製歌曲名稱', err);
-            });
+
+            // 創建一個臨時的文本區域來選擇和複製文字
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+
+            try {
+                // 嘗試使用 navigator.clipboard API
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    alert('已複製到剪貼簿: ' + textToCopy);
+                }).catch(() => {
+                    // 如果 navigator.clipboard 失敗，則使用 execCommand
+                    document.execCommand('copy') ? alert('已複製到剪貼簿: ' + textToCopy) : console.error('無法複製歌曲名稱');
+                });
+            } catch (err) {
+                // 如果 navigator.clipboard 不可用，則使用 execCommand
+                document.execCommand('copy') ? alert('已複製到剪貼簿: ' + textToCopy) : console.error('無法複製歌曲名稱', err);
+            }
+
+            // 移除臨時創建的文本區域
+            document.body.removeChild(textArea);
         }
         function updateTheme(mainColor, subColor, subColor_1) {
             document.documentElement.style.setProperty('--main-color', mainColor);

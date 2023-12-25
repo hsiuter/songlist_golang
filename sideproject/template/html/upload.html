@@ -7,6 +7,15 @@
     <!-- <link rel="stylesheet" href="/assets/css/songlist_management.css"> -->
     <!-- 这里可以添加更多的CSS样式 -->
     <script>
+        window.onload = function () {
+            var username = document.querySelector('.user-info span').textContent;
+            // 检查用户名是否为空或仅包含欢迎信息
+            if (!username || username.trim() === '欢迎回来！！' || username.includes('欢迎回来！！')) {
+                window.location.href = '/loginpage'; // 重定向到登录页面
+            }
+        };
+    </script>
+    <script>
         function uploadFile(event) {
             var fileInput = document.getElementById('songlist');
             var file = fileInput.files[0];
@@ -134,6 +143,9 @@
 
 <body>
     <div class="container">
+        <div class="browser-warning">
+            建議使用Google Chrome，否則部分功能無法支援。
+        </div>
         <div class="navbar">
             <button onclick="showSection('songlist-management')">歌单管理</button>
             <button onclick="showSection('theme-management')">主题色管理</button>
@@ -165,7 +177,7 @@
                 <input type="text" id="songName" placeholder="歌曲名称">
                 <input type="text" id="singer" placeholder="歌手">
                 <input type="text" id="language" placeholder="语言">
-                <input type="text" id="description" placeholder="描述">
+                <input type="text" id="description" placeholder="備註">
                 <button type="submit">添加歌曲</button>
             </form>
             <ul id="songlist_display">
@@ -176,8 +188,11 @@
             <!-- 主题色管理的表单放在这里 -->
             <form onsubmit="uploadTheme()" class="theme-form">
                 <!-- 主题配色选择 -->
+                <div class="color-label">主要背景色</div>
                 <input type="color" name="main_color" id="main_color" class="color" value="{{.MainColor}}">
+                <div class="color-label">按鈕被按下時的背景色</div>
                 <input type="color" name="sub_color" id="sub_color" class="color" value="{{.SubColor}}">
+                <div class="color-label">表單顏色</div>
                 <input type="color" name="sub_color_1" id="sub_color_1" class="color" value="{{.SubColor_1}}">
                 <input type="submit" value="更新主题" class="theme-button">
             </form>

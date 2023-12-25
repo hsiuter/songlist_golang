@@ -73,3 +73,41 @@ select {
     text-align: center;
 
 }
+
+
+@media(max-width: 1000px) {
+    .form-title {
+        font-size: 60px;
+    }
+
+    form {
+        width: 80%;
+        height: 90%;
+    }
+
+    label {
+        font-size: 40px;
+        margin: 20px;
+    }
+
+    input {
+        font-size: 40px;
+        height: 70px;
+        width: 90%;
+        margin: 20px;
+        border: 3px solid #BEB7DF;
+    }
+
+    select {
+        width: 90%;
+        height: 140px;
+        font-size: 40px;
+        margin: 20px;
+        border: 3px solid #BEB7DF;
+    }
+
+    .submit-button {
+        height: 60px;
+        font-size: 30px;
+    }
+}

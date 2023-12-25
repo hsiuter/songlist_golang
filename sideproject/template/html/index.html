@@ -16,6 +16,8 @@
 
         <label for="password">密码</label>
         <input type="password" id="password" name="password" required>
+        <label for="confirm_password">確認密码</label>
+        <input type="password" id="confirm_password" name="confirm_password" required>
 
         <label for="email">信箱</label>
         <input type="email" id="email" name="email" required>
@@ -39,6 +41,7 @@
 
     </form>
 
+
     <script>
         document.getElementById("registration-form").addEventListener("submit", function (event) {
             event.preventDefault(); // 阻止默认表单提交行为
@@ -46,12 +49,23 @@
             // 获取用户名和密码
             var username = document.getElementById("username").value;
             var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirm_password").value;
             var email = document.getElementById("email").value;
             var security_question = document.getElementById("security_question").value;
             var security_answer = document.getElementById("security_answer").value;
 
 
             var validUsername = /^[A-Za-z0-9]+$/.test(username);
+            if (password !== confirmPassword) {
+                alert("密碼和確認密碼不匹配。");
+                return;
+            }
+
+            // 检查所有必填字段是否完成
+            if (!username || !password || !email || !security_question || !security_answer) {
+                alert("請完成所有必填欄位。");
+                return;
+            }
             if (!validUsername) {
                 alert("用户名只能包含英文字母和数字。");
                 event.preventDefault(); // 阻止表单提交
@@ -77,6 +91,7 @@
                 }
             };
         });
+
     </script>
 </body>
 

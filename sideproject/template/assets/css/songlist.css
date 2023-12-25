@@ -30,8 +30,8 @@ body {
 }
 
 .container {
-    width: 75vw;
-    height: 100vh;
+    width: 75%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -212,5 +212,60 @@ body {
     &::-webkit-scrollbar-thumb {
         border-radius: 10px;
         background-color: var(--main-color);
+    }
+}
+
+@media(max-width: 1000px) {
+    .container {
+        flex-direction: column;
+        /* 在小屏幕上使用垂直布局 */
+        width: 100%;
+    }
+
+    .intro_container,
+    .songlist_container {
+        width: 80%;
+        /* 讓每個容器在小屏幕上占滿整個寬度 */
+        margin: 10px 0;
+    }
+
+    .intro_container {
+        height: 30%;
+    }
+
+    .songlist_container {
+        height: 60%;
+    }
+
+    #avatarImage {
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+    }
+
+    .button_container button {
+        height: 70%;
+        font-size: 40px;
+    }
+
+    .table_container {
+        height: 70%;
+    }
+
+    #songlistTable th,
+    #songlistTable td {
+        font-size: 30px;
+    }
+
+    .intro {
+        font-size: 50px;
+    }
+
+    #avatar {
+        height: 40%;
+    }
+
+    #searchBox {
+        font-size: 30px;
     }
 }
