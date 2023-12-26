@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/xuri/excelize/v2"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var db *sql.DB
@@ -64,7 +65,7 @@ func main() {
 	r.POST("/add-song", handleAddSong)
 
 	fmt.Println("Server is listening on port 80...")
-	err = r.Run(":80")
+	err = r.Run(":8080")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -134,8 +135,14 @@ func handleRegistration(c *gin.Context) {
 		c.String(http.StatusBadRequest, "用户名已存在")
 		return
 	}
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		// 處理錯誤
+		c.String(http.StatusInternalServerError, "密碼加密失敗")
+		return
+	}
 
-	_, err = db.Exec("INSERT INTO users (username, password, email, security_question, security_answer) VALUES (?, ?, ?, ?, ?)", username, password, email, securityQuestion, securityAnswer)
+	_, err = db.Exec("INSERT INTO users (username, password, email, security_question, security_answer) VALUES (?, ?, ?, ?, ?)", username, hashedPassword, email, securityQuestion, securityAnswer)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "注册失败")
 		log.Println("注册失败:", err)
@@ -145,29 +152,67 @@ func handleRegistration(c *gin.Context) {
 	c.String(http.StatusOK, "注册成功")
 }
 
+// func handleLogin(c *gin.Context) {
+// 	username := c.PostForm("username")
+// 	password := c.PostForm("password")
+
+// 	var userID int
+// 	err := db.QueryRow("SELECT id FROM users WHERE username = ? AND password = ?", username, password).Scan(&userID)
+// 	if err != nil {
+// 		if err == sql.ErrNoRows {
+// 			c.String(http.StatusUnauthorized, "无效的用户名或密码")
+// 		} else {
+// 			c.String(http.StatusInternalServerError, "服务器错误")
+// 		}
+// 		return
+// 	}
+
+// 	session := sessions.Default(c)
+// 	session.Set("user_id", userID)
+// 	session.Set("username", username) // 存储用户名到会话中
+// 	session.Save()
+
+// 	c.Redirect(http.StatusFound, "/uploadpage")
+// }
+
 func handleLogin(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")
 
+	// 從數據庫中檢索用戶信息
 	var userID int
-	err := db.QueryRow("SELECT id FROM users WHERE username = ? AND password = ?", username, password).Scan(&userID)
+	var storedPassword string
+	err := db.QueryRow("SELECT id, password FROM users WHERE username = ?", username).Scan(&userID, &storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.String(http.StatusUnauthorized, "无效的用户名或密码")
+			// 沒有找到用戶
+			c.String(http.StatusUnauthorized, "無效的用戶名或密碼")
 		} else {
-			c.String(http.StatusInternalServerError, "服务器错误")
+			// 發生其他錯誤
+			c.String(http.StatusInternalServerError, "伺服器錯誤")
 		}
 		return
 	}
 
+	// 使用 bcrypt 比較密碼
+	err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
+	if err != nil {
+		// 密碼不匹配
+		c.String(http.StatusUnauthorized, "無效的用戶名或密碼")
+		return
+	}
+
+	// 密碼驗證成功，設置會話
 	session := sessions.Default(c)
 	session.Set("user_id", userID)
-	session.Set("username", username) // 存储用户名到会话中
-	session.Save()
+	session.Set("username", username) // 存儲用戶名到會話中
+	err = session.Save()
+	if err != nil {
+		c.String(http.StatusInternalServerError, "伺服器錯誤")
+		return
+	}
 
-	// c.Redirect(http.StatusFound, fmt.Sprintf("/%s/songlistpage", username))
-
-	// c.String(http.StatusOK, "登录成功")
+	// 重定向到用戶的歌單頁面
 	c.Redirect(http.StatusFound, "/uploadpage")
 }
 
@@ -376,34 +421,41 @@ func handleSongListUpdate(c *gin.Context) {
 }
 
 func handleResetPassword(c *gin.Context) {
-	// 获取表单数据
+	// 獲取表單數據
 	username := c.PostForm("username")
 	securityQuestion := c.PostForm("security_question")
 	securityAnswer := c.PostForm("security_answer")
 	newPassword := c.PostForm("new_password")
 
-	// 根据用户名从数据库中获取用户的安全问题和答案
+	// 根據用戶名從數據庫中獲取用戶的安全問題和答案
 	var storedSecurityQuestion, storedSecurityAnswer string
 	err := db.QueryRow("SELECT security_question, security_answer FROM users WHERE username = ?", username).Scan(&storedSecurityQuestion, &storedSecurityAnswer)
 	if err != nil {
-		c.String(http.StatusUnauthorized, "无效的用户名")
+		c.String(http.StatusUnauthorized, "無效的用戶名")
 		return
 	}
 
-	// 验证安全问题和答案是否匹配
+	// 驗證安全問題和答案是否匹配
 	if securityQuestion != storedSecurityQuestion || securityAnswer != storedSecurityAnswer {
-		c.String(http.StatusUnauthorized, "安全问题或答案不正确")
+		c.String(http.StatusUnauthorized, "安全問題或答案不正確")
 		return
 	}
 
-	// 更新用户的密码
-	_, err = db.Exec("UPDATE users SET password = ? WHERE username = ?", newPassword, username)
+	// 對新密碼進行加密
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "密码重置失败")
+		c.String(http.StatusInternalServerError, "密碼加密失敗")
 		return
 	}
 
-	c.String(http.StatusOK, "密码重置成功")
+	// 更新用戶的密碼
+	_, err = db.Exec("UPDATE users SET password = ? WHERE username = ?", hashedPassword, username)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "密碼重置失敗")
+		return
+	}
+
+	c.String(http.StatusOK, "密碼重置成功")
 }
 
 // 在 main.go 中编写 handleGetUserIDAndAvatar 函数
