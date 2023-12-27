@@ -222,7 +222,7 @@ func IndexPage(c *gin.Context) {
 
 func UploadPage(c *gin.Context) {
 	// wait 0.5 seconds
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	session := sessions.Default(c)
 	username := session.Get("username")
