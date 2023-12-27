@@ -17,7 +17,7 @@
             <button onclick="showSection('theme-management')">主题色管理</button>
             <button onclick="showSection('go-to-songlist')">头像上传</button>
             <div class="user-info">
-                <span>欢迎回来！{{.Username}}！</span>
+                <span>欢迎回来 ！{{.Username}} ！</span>
             </div>
         </div>
         <div id="songlist-management" class="section">
@@ -50,15 +50,16 @@
                 <!-- 歌单列表将通过 JavaScript 动态加载 -->
             </ul>
         </div>
+
         <div id="theme-management" class="section" style="display:none;">
             <!-- 主题色管理的表单放在这里 -->
             <form onsubmit="uploadTheme()" class="theme-form">
                 <!-- 主题配色选择 -->
                 <div class="color-label">主要背景色</div>
                 <input type="color" name="main_color" id="main_color" class="color" value="{{.MainColor}}">
-                <div class="color-label">按鈕被按下時的背景色</div>
+                <div class="color-label">按鈕点击色</div>
                 <input type="color" name="sub_color" id="sub_color" class="color" value="{{.SubColor}}">
-                <div class="color-label">表單顏色</div>
+                <div class="color-label">表單背景色</div>
                 <input type="color" name="sub_color_1" id="sub_color_1" class="color" value="{{.SubColor_1}}">
                 <input type="submit" value="更新主题" class="theme-button">
             </form>

@@ -7,6 +7,11 @@
     /* var(--sub-color); */
 }
 
+@font-face {
+    font-family: "font";
+    src: url("/assets/font/LXGWNeoXiHei.ttf");
+}
+
 html {
     margin: 0;
     padding: 0;
@@ -20,6 +25,7 @@ body {
     padding: 0;
     height: 100%;
     width: 100%;
+    font-family: "font" !important;
 }
 
 .selected {
@@ -49,8 +55,8 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-color: #BEB7DFa3;
-    border: 4px solid #BEB7DF;
+    background-color: #bebebea3;
+    border: 4px solid #bebebe;
     box-shadow: 0 1px 10px 0 #e0e5e8;
     border-radius: 20px;
 }
@@ -96,8 +102,8 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-color: #BEB7DFa3;
-    border: 4px solid #BEB7DF;
+    background-color: #bebebea3;
+    border: 4px solid #bebebe;
     box-shadow: 0 1px 10px 0 #e0e5e8;
     border-radius: 20px;
 }
@@ -116,12 +122,14 @@ body {
     width: 25%;
     height: 40px;
     font-weight: bold;
-    background-color: #dfd8e8;
+    background-color: #eeeeeea3;
     color: var(--main-color);
-    border: #dfd8e8 3px solid;
+    border: #eeeeeea3 3px solid;
     border-radius: 20px;
-    font-size: 16px;
+    font-size: 20px;
     cursor: pointer;
+    font-family: "font" !important;
+    line-height: 1.85 !important;
 }
 
 .button_container button:hover {
@@ -131,7 +139,7 @@ body {
 #searchBox {
     width: 87%;
     height: 8%;
-    background-color: #dfd8e8;
+    background-color: #eeeeeea3;
     border: var(--main-color) 4px solid;
     border-radius: 20px;
     font-size: 16px;

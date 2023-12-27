@@ -125,7 +125,7 @@ window.onload = function () {
 
     // 定义一个函数来处理歌曲名的点击事件
     function copySongNameToClipboard(songName) {
-        const textToCopy = `我可以點歌嗎！我想要聽${songName}`;
+        const textToCopy = `我可以點歌嗎！想要聽${songName}`;
 
         // 創建一個臨時的文本區域來選擇和複製文字
         const textArea = document.createElement('textarea');

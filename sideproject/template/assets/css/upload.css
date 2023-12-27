@@ -1,8 +1,37 @@
+@font-face {
+    font-family: "font";
+    src: url("/assets/font/LXGWNeoXiHei.ttf");
+}
+
 body {
-    font-family: sans-serif;
+    font-family: "font" !important;
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
+}
+
+button {
+    font-family: "font" !important;
+}
+
+input {
+    font-family: "font" !important;
+}
+
+input::file-selector-button {
+    font-size: 16px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    border-radius: 5px;
+    font-family: "font" !important;
+    margin-right: 10px;
+}
+
+input::file-selector-button:hover {
+    background-color: #4cae4c;
 }
 
 .container {
@@ -50,6 +79,7 @@ body {
     margin: 10px auto;
     border-radius: 5px;
     border: 1px solid #ddd;
+    font-size: 18px;
 }
 
 .uploadbutton,
@@ -82,10 +112,24 @@ body {
 }
 
 .color {
-    width: 50px;
-    height: 50px;
-    border: none;
+    width: 50px !important;
+    height: 53px !important;
+    border: none !important;
     cursor: pointer;
+    background-color: #ffffff !important;
+    padding: 0% !important;
+}
+
+#main_color::-webkit-color-swatch {
+    border-radius: 50%;
+}
+
+#sub_color::-webkit-color-swatch {
+    border-radius: 50%;
+}
+
+#sub_color_1::-webkit-color-swatch {
+    border-radius: 50%;
 }
 
 .gotosonglist {
@@ -123,6 +167,7 @@ body {
     margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    font-size: 16px;
 }
 
 #addSongForm button[type="submit"] {
