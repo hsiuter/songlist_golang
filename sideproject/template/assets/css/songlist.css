@@ -55,15 +55,17 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-color: #bebebea3;
-    border: 4px solid #bebebe;
+
+    /* rgba */
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 4px solid #e0e5e8;
     box-shadow: 0 1px 10px 0 #e0e5e8;
     border-radius: 20px;
 }
 
 #avatarImage {
-    width: 300px;
-    height: 300px;
+    width: 100%;
+    max-width: 300px;
     border-radius: 50%;
 }
 
@@ -91,6 +93,8 @@ body {
     justify-content: center;
     text-align: center;
     margin: 10px 0;
+    color: var(--main-color);
+    font-weight: bold;
 }
 
 .songlist_container {
@@ -102,8 +106,8 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-color: #bebebea3;
-    border: 4px solid #bebebe;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 4px solid #e0e5e8;
     box-shadow: 0 1px 10px 0 #e0e5e8;
     border-radius: 20px;
 }
@@ -122,7 +126,7 @@ body {
     width: 25%;
     height: 40px;
     font-weight: bold;
-    background-color: #eeeeeea3;
+    background-color: rgba(255, 255, 255, 0.5);
     color: var(--main-color);
     border: #eeeeeea3 3px solid;
     border-radius: 20px;
@@ -139,17 +143,25 @@ body {
 #searchBox {
     width: 87%;
     height: 8%;
-    background-color: #eeeeeea3;
+    background-color: rgba(255, 255, 255, 0.0);
     border: var(--main-color) 4px solid;
     border-radius: 20px;
-    font-size: 16px;
+    font-size: 18px;
     padding-left: 2%;
     outline: none;
     margin: 1% 0;
+    color: var(--main-color) !important;
+    font-weight: bold;
+    font-family: "font" !important;
+}
+
+::placeholder {
+    color: var(--main-color) !important;
+    opacity: 1;
 }
 
 #searchBox:focus {
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.9);
 }
 
 .table_container {
